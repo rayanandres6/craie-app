@@ -99,6 +99,15 @@
     display:flex; flex-direction:column; justify-content:center;
     border-bottom:1px solid var(--line);
   }
+  .reveal{
+    opacity:0; transform:translateY(28px);
+    transition:opacity .7s ease, transform .7s ease;
+  }
+  .panel.in-view .reveal{opacity:1; transform:translateY(0);}
+  .reveal.r1{transition-delay:0s;}
+  .reveal.r2{transition-delay:.1s;}
+  .reveal.r3{transition-delay:.2s;}
+  .reveal.r4{transition-delay:.3s;}
   .eyebrow{
     font-size:12px; text-transform:uppercase; letter-spacing:.16em; color:var(--amber);
     margin:0 0 14px;
@@ -227,6 +236,7 @@
   @media (prefers-reduced-motion: reduce){
     main.snap{scroll-behavior:auto;}
     .chalk-path, .chalk-token{animation:none !important; stroke-dashoffset:0; opacity:1; transform:none;}
+    .reveal{opacity:1 !important; transform:none !important; transition:none !important;}
   }
 </style>
 </head>
@@ -274,10 +284,10 @@
   <section id="accueil" class="panel hero">
     <div class="hero-grid">
       <div>
-        <p class="eyebrow" data-i18n="hero_eyebrow">Planificateur multisport</p>
-        <h1>CRAIE</h1>
-        <p class="lede" data-i18n="hero_lede">Préparez vos séances et tracez vos tactiques. Un seul tableau, tous les sports : foot, basket, hockey sur gazon, hockey sur glace, rugby.</p>
-        <div class="hero-actions">
+        <p class="eyebrow reveal r1" data-i18n="hero_eyebrow">Planificateur multisport</p>
+        <h1 class="reveal r2">CRAIE</h1>
+        <p class="lede reveal r3" data-i18n="hero_lede">Préparez vos séances et tracez vos tactiques. Un seul tableau, tous les sports : foot, basket, hockey sur gazon, hockey sur glace, rugby.</p>
+        <div class="hero-actions reveal r4">
           <a href="#tableau" class="btn btn-primary" data-i18n="hero_cta1">Ouvrir le tableau blanc</a>
           <a href="#abonnement" class="btn btn-ghost" data-i18n="hero_cta2">Voir Pro</a>
         </div>
@@ -296,10 +306,10 @@
 
   <!-- SEANCES -->
   <section id="seances" class="panel">
-    <p class="eyebrow" data-i18n="seances_eyebrow">Planning</p>
-    <h2 data-i18n="seances_title">Séances</h2>
-    <p class="lede" data-i18n="seances_lede">Ajoutez vos séances, elles restent enregistrées sur cet appareil.</p>
-    <div class="seance-layout">
+    <p class="eyebrow reveal r1" data-i18n="seances_eyebrow">Planning</p>
+    <h2 class="reveal r2" data-i18n="seances_title">Séances</h2>
+    <p class="lede reveal r3" data-i18n="seances_lede">Ajoutez vos séances, elles restent enregistrées sur cet appareil.</p>
+    <div class="seance-layout reveal r4">
       <form class="seance-form" id="seanceForm">
         <div>
           <label for="s-date" data-i18n="seances_label_date">Date / jour</label>
@@ -325,11 +335,11 @@
 
   <!-- TABLEAU BLANC -->
   <section id="tableau" class="panel">
-    <p class="eyebrow" data-i18n="board_eyebrow">Tactique</p>
-    <h2 data-i18n="board_title">Tableau blanc</h2>
-    <p class="lede" data-i18n="board_lede">Choisissez un terrain, dessinez vos schémas.</p>
+    <p class="eyebrow reveal r1" data-i18n="board_eyebrow">Tactique</p>
+    <h2 class="reveal r2" data-i18n="board_title">Tableau blanc</h2>
+    <p class="lede reveal r3" data-i18n="board_lede">Choisissez un terrain, dessinez vos schémas.</p>
 
-    <div class="sport-pills" id="sportPills">
+    <div class="sport-pills reveal r4" id="sportPills">
       <button class="pill active" data-sport="football"><span class="dot" style="background:var(--football)"></span><span data-i18n="sport_football">Football</span></button>
       <button class="pill" data-sport="basket"><span class="dot" style="background:var(--basket)"></span><span data-i18n="sport_basket">Basketball</span></button>
       <button class="pill" data-sport="gazon"><span class="dot" style="background:var(--gazon)"></span><span data-i18n="sport_gazon">Hockey sur gazon</span></button>
@@ -337,7 +347,7 @@
       <button class="pill" data-sport="rugby"><span class="dot" style="background:var(--rugby)"></span><span data-i18n="sport_rugby">Rugby</span></button>
     </div>
 
-    <div class="board-layout">
+    <div class="board-layout reveal r4">
       <div class="toolbar" id="toolbar">
         <button class="tool active" data-tool="pen" title="Craie" data-i18n-title="tool_pen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21l4-1 11-11-3-3L4 17l-1 4z"/></svg>
@@ -444,15 +454,16 @@
       <button class="btn btn-ghost" id="clearBtn" data-i18n="board_clear">Tout effacer</button>
       <button class="btn btn-ghost" id="saveBtn" data-i18n="board_save">Enregistrer</button>
       <button class="btn btn-ghost" id="loadBtn" data-i18n="board_load">Charger</button>
+      <button class="btn btn-primary" id="exportBtn" data-i18n="board_export">Exporter HD</button>
     </div>
   </section>
 
   <!-- ABONNEMENT -->
   <section id="abonnement" class="panel">
-    <p class="eyebrow" data-i18n="plans_eyebrow">Abonnement</p>
-    <h2 data-i18n="plans_title">Gratuit ou Pro</h2>
-    <p class="lede" data-i18n="plans_lede">Le tableau et le planning restent gratuits. Pro ajoute l'assistant IA et l'export.</p>
-    <div class="plans">
+    <p class="eyebrow reveal r1" data-i18n="plans_eyebrow">Abonnement</p>
+    <h2 class="reveal r2" data-i18n="plans_title">Gratuit ou Pro</h2>
+    <p class="lede reveal r3" data-i18n="plans_lede">Le tableau et le planning restent gratuits. Pro ajoute l'assistant IA et l'export.</p>
+    <div class="plans reveal r4">
       <div class="plan">
         <div class="eyebrow" style="color:var(--chalk-dim)" data-i18n="plan_free_name">Gratuit</div>
         <div class="price">0€<small data-i18n="plan_per_month"> /mois</small></div>
@@ -479,10 +490,10 @@
 
   <!-- CONTACT -->
   <section id="contact" class="panel">
-    <p class="eyebrow" data-i18n="contact_eyebrow">Contact</p>
-    <h2 data-i18n="contact_title">Besoin d'aide ?</h2>
-    <p class="lede" data-i18n="contact_lede">Une question, un bug, une idée ? Écrivez-moi directement.</p>
-    <div class="contact-grid">
+    <p class="eyebrow reveal r1" data-i18n="contact_eyebrow">Contact</p>
+    <h2 class="reveal r2" data-i18n="contact_title">Besoin d'aide ?</h2>
+    <p class="lede reveal r3" data-i18n="contact_lede">Une question, un bug, une idée ? Écrivez-moi directement.</p>
+    <div class="contact-grid reveal r4">
       <div class="contact-card">
         <p style="color:var(--chalk-dim); font-size:14px; margin-top:0;" data-i18n="contact_email_label">Email direct</p>
         <a class="mail-link" href="mailto:andres.visual6@gmail.com">andres.visual6@gmail.com</a>
@@ -520,7 +531,7 @@
       ai_ph:"Ex. exercice de passes pour débutantes, 10 min", ai_btn:"Proposer un exercice",
       ai_wait:"Génération en cours...", ai_empty:"Décrivez d'abord votre besoin ci-dessus.",
       ai_error:"Erreur de connexion à l'assistant. Réessayez.", ai_none:"Pas de réponse, réessayez.",
-      board_undo:"Annuler", board_clear:"Tout effacer", board_save:"Enregistrer", board_load:"Charger",
+      board_undo:"Annuler", board_clear:"Tout effacer", board_save:"Enregistrer", board_load:"Charger", board_export:"Exporter HD",
       plans_eyebrow:"Abonnement", plans_title:"Gratuit ou Pro",
       plans_lede:"Le tableau et le planning restent gratuits. Pro ajoute l'assistant IA et l'export.",
       plan_free_name:"Gratuit", plan_pro_name:"Pro", plan_per_month:" /mois",
@@ -562,7 +573,7 @@
       ai_ph:"E.g. passing drill for beginners, 10 min", ai_btn:"Suggest a drill",
       ai_wait:"Generating...", ai_empty:"Describe what you need above first.",
       ai_error:"Connection error. Please try again.", ai_none:"No response, try again.",
-      board_undo:"Undo", board_clear:"Clear all", board_save:"Save", board_load:"Load",
+      board_undo:"Undo", board_clear:"Clear all", board_save:"Save", board_load:"Load", board_export:"Export HD",
       plans_eyebrow:"Plan", plans_title:"Free or Pro",
       plans_lede:"The board and schedule stay free. Pro adds the AI assistant and export.",
       plan_free_name:"Free", plan_pro_name:"Pro", plan_per_month:" /month",
@@ -604,7 +615,7 @@
       ai_ph:"Bv. pass-oefening voor beginners, 10 min", ai_btn:"Oefening voorstellen",
       ai_wait:"Bezig met genereren...", ai_empty:"Beschrijf eerst je behoefte hierboven.",
       ai_error:"Verbindingsfout. Probeer opnieuw.", ai_none:"Geen antwoord, probeer opnieuw.",
-      board_undo:"Ongedaan maken", board_clear:"Alles wissen", board_save:"Opslaan", board_load:"Laden",
+      board_undo:"Ongedaan maken", board_clear:"Alles wissen", board_save:"Opslaan", board_load:"Laden", board_export:"Exporteren HD",
       plans_eyebrow:"Abonnement", plans_title:"Gratis of Pro",
       plans_lede:"Bord en planning blijven gratis. Pro voegt de AI-assistent en export toe.",
       plan_free_name:"Gratis", plan_pro_name:"Pro", plan_per_month:" /maand",
@@ -646,7 +657,7 @@
       ai_ph:"Z. B. Passübung für Anfänger, 10 Min", ai_btn:"Übung vorschlagen",
       ai_wait:"Wird generiert...", ai_empty:"Beschreibe zuerst deinen Bedarf oben.",
       ai_error:"Verbindungsfehler. Bitte erneut versuchen.", ai_none:"Keine Antwort, bitte erneut versuchen.",
-      board_undo:"Rückgängig", board_clear:"Alles löschen", board_save:"Speichern", board_load:"Laden",
+      board_undo:"Rückgängig", board_clear:"Alles löschen", board_save:"Speichern", board_load:"Laden", board_export:"HD exportieren",
       plans_eyebrow:"Abo", plans_title:"Gratis oder Pro",
       plans_lede:"Board und Planung bleiben gratis. Pro ergänzt den KI-Assistenten und den Export.",
       plan_free_name:"Gratis", plan_pro_name:"Pro", plan_per_month:" /Monat",
@@ -859,6 +870,14 @@
   });
   loadSeances();
 
+  // ---------- SCROLL REVEAL ----------
+  const revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      entry.target.classList.toggle('in-view', entry.isIntersecting);
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('section.panel').forEach(p=> revealObserver.observe(p));
+
   // ---------- SPORT SELECT ----------
   const pills = document.querySelectorAll('#sportPills .pill');
   const fields = document.querySelectorAll('.field');
@@ -962,55 +981,83 @@
     redraw();
   });
 
-  function drawArrowHead(x1,y1,x2,y2,color){
+  function drawArrowHead(targetCtx, x1,y1,x2,y2,color){
     const angle = Math.atan2(y2-y1, x2-x1);
     const len = 12;
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - len*Math.cos(angle - Math.PI/7), y2 - len*Math.sin(angle - Math.PI/7));
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - len*Math.cos(angle + Math.PI/7), y2 - len*Math.sin(angle + Math.PI/7));
-    ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.lineCap = 'round';
-    ctx.stroke();
+    targetCtx.beginPath();
+    targetCtx.moveTo(x2, y2);
+    targetCtx.lineTo(x2 - len*Math.cos(angle - Math.PI/7), y2 - len*Math.sin(angle - Math.PI/7));
+    targetCtx.moveTo(x2, y2);
+    targetCtx.lineTo(x2 - len*Math.cos(angle + Math.PI/7), y2 - len*Math.sin(angle + Math.PI/7));
+    targetCtx.strokeStyle = color; targetCtx.lineWidth = 3; targetCtx.lineCap = 'round';
+    targetCtx.stroke();
   }
   function drawArrowPreview(a,b){
     ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
     ctx.strokeStyle = currentColor; ctx.lineWidth = 3; ctx.lineCap='round'; ctx.stroke();
-    drawArrowHead(a.x,a.y,b.x,b.y,currentColor);
+    drawArrowHead(ctx, a.x,a.y,b.x,b.y,currentColor);
   }
 
-  function redraw(){
-    ctx.clearRect(0,0,canvas.width, canvas.height);
+  function renderObjects(targetCtx){
     objects.forEach(o=>{
       if(o.type === 'stroke'){
         if(o.points.length < 2) return;
-        ctx.beginPath();
-        ctx.moveTo(o.points[0].x, o.points[0].y);
-        o.points.forEach(pt=> ctx.lineTo(pt.x, pt.y));
-        ctx.strokeStyle = o.color; ctx.lineWidth = 3; ctx.lineCap='round'; ctx.lineJoin='round';
-        ctx.stroke();
+        targetCtx.beginPath();
+        targetCtx.moveTo(o.points[0].x, o.points[0].y);
+        o.points.forEach(pt=> targetCtx.lineTo(pt.x, pt.y));
+        targetCtx.strokeStyle = o.color; targetCtx.lineWidth = 3; targetCtx.lineCap='round'; targetCtx.lineJoin='round';
+        targetCtx.stroke();
       } else if(o.type === 'arrow'){
-        ctx.beginPath(); ctx.moveTo(o.x1,o.y1); ctx.lineTo(o.x2,o.y2);
-        ctx.strokeStyle = o.color; ctx.lineWidth = 3; ctx.lineCap='round'; ctx.stroke();
-        drawArrowHead(o.x1,o.y1,o.x2,o.y2,o.color);
+        targetCtx.beginPath(); targetCtx.moveTo(o.x1,o.y1); targetCtx.lineTo(o.x2,o.y2);
+        targetCtx.strokeStyle = o.color; targetCtx.lineWidth = 3; targetCtx.lineCap='round'; targetCtx.stroke();
+        drawArrowHead(targetCtx, o.x1,o.y1,o.x2,o.y2,o.color);
       } else if(o.type === 'token'){
-        ctx.beginPath(); ctx.arc(o.x,o.y,14,0,Math.PI*2);
-        ctx.fillStyle = 'rgba(20,23,26,.9)'; ctx.fill();
-        ctx.strokeStyle = o.color; ctx.lineWidth = 2.5; ctx.stroke();
-        ctx.fillStyle = o.color; ctx.font = '600 12px Inter'; ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText(o.label, o.x, o.y+1);
+        targetCtx.beginPath(); targetCtx.arc(o.x,o.y,14,0,Math.PI*2);
+        targetCtx.fillStyle = 'rgba(20,23,26,.9)'; targetCtx.fill();
+        targetCtx.strokeStyle = o.color; targetCtx.lineWidth = 2.5; targetCtx.stroke();
+        targetCtx.fillStyle = o.color; targetCtx.font = '600 12px Inter'; targetCtx.textAlign='center'; targetCtx.textBaseline='middle';
+        targetCtx.fillText(o.label, o.x, o.y+1);
       } else if(o.type === 'ball'){
-        ctx.beginPath(); ctx.arc(o.x,o.y,8,0,Math.PI*2);
-        ctx.fillStyle = '#F5F1E6'; ctx.fill();
-        ctx.strokeStyle = '#14171A'; ctx.lineWidth = 1.5; ctx.stroke();
+        targetCtx.beginPath(); targetCtx.arc(o.x,o.y,8,0,Math.PI*2);
+        targetCtx.fillStyle = '#F5F1E6'; targetCtx.fill();
+        targetCtx.strokeStyle = '#14171A'; targetCtx.lineWidth = 1.5; targetCtx.stroke();
       }
     });
+  }
+  function redraw(){
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    renderObjects(ctx);
   }
 
   document.getElementById('undoBtn').addEventListener('click', ()=>{ objects.pop(); redraw(); });
   document.getElementById('clearBtn').addEventListener('click', ()=>{ objects = []; tokenCount = 0; redraw(); });
   document.getElementById('saveBtn').addEventListener('click', ()=> saveBoardForSport(currentSport));
   document.getElementById('loadBtn').addEventListener('click', ()=> loadBoardForSport(currentSport));
+  document.getElementById('exportBtn').addEventListener('click', exportBoardHD);
+
+  function exportBoardHD(){
+    const activeSvg = document.querySelector('.field.active');
+    const svgText = new XMLSerializer().serializeToString(activeSvg);
+    const svgUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgText)));
+    const img = new Image();
+    img.onload = ()=>{
+      const W = 1600, H = 1000;
+      const off = document.createElement('canvas');
+      off.width = W; off.height = H;
+      const octx = off.getContext('2d');
+      octx.drawImage(img, 0, 0, W, H);
+      const scale = W / canvas.width;
+      octx.save();
+      octx.scale(scale, scale);
+      renderObjects(octx);
+      octx.restore();
+      const link = document.createElement('a');
+      link.download = `craie-${currentSport}.png`;
+      link.href = off.toDataURL('image/png');
+      link.click();
+    };
+    img.src = svgUrl;
+  }
 
   async function saveBoardForSport(sport){
     if(currentUser){
