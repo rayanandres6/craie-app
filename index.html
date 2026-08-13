@@ -6,6 +6,7 @@
 <title>CRAIE — Planificateur tactique multisport</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
   :root{
     --ink:#14171A;
@@ -59,6 +60,34 @@
   }
   #langSelect:hover{color:var(--chalk);}
   #langSelect option{background:var(--board); color:var(--chalk);}
+
+  #accountBtn{
+    background:transparent; color:var(--chalk-dim); border:1px solid var(--line);
+    border-radius:2px; font-size:12px; letter-spacing:.03em; padding:6px 12px;
+  }
+  #accountBtn:hover{color:var(--chalk); border-color:var(--chalk-dim);}
+  .sync-dot{display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--amber); margin-right:6px; vertical-align:middle;}
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(20,23,26,.75); backdrop-filter:blur(4px);
+    display:none; align-items:center; justify-content:center; z-index:100; padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-box{
+    background:var(--board); border:1px solid var(--line); border-radius:6px;
+    padding:28px; width:100%; max-width:360px; position:relative;
+  }
+  .modal-box h3{margin:0 0 4px; font-size:22px;}
+  .modal-box p.sub{color:var(--chalk-dim); font-size:13px; margin:0 0 18px;}
+  .modal-box input{
+    width:100%; background:var(--ink); border:1px solid var(--line); color:var(--chalk);
+    padding:10px 12px; border-radius:2px; font-family:inherit; font-size:14px; margin-bottom:10px;
+  }
+  .modal-close{position:absolute; top:14px; right:16px; background:none; border:none; color:var(--chalk-dim); font-size:20px; padding:2px 6px;}
+  .modal-close:hover{color:var(--chalk);}
+  .modal-error{color:#E8735C; font-size:12px; min-height:16px; margin:-2px 0 8px;}
+  .modal-switch{font-size:12px; color:var(--chalk-dim); margin-top:14px; text-align:center;}
+  .modal-switch button{background:none; border:none; color:var(--amber); font-size:12px; padding:0;}
 
   /* snap layout */
   main.snap{
@@ -219,8 +248,25 @@
       <option value="nl">NL</option>
       <option value="de">DE</option>
     </select>
+    <button id="accountBtn" data-i18n="account_login">Se connecter</button>
   </div>
 </header>
+
+<div class="modal-overlay" id="authModal">
+  <div class="modal-box">
+    <button class="modal-close" id="authModalClose">&times;</button>
+    <h3 id="authTitle" data-i18n="auth_login_title">Connexion</h3>
+    <p class="sub" id="authSub" data-i18n="auth_login_sub">Retrouve tes séances et tableaux sur tous tes appareils.</p>
+    <input type="email" id="authEmail" data-i18n-ph="auth_email_ph" placeholder="Email" autocomplete="email">
+    <input type="password" id="authPassword" data-i18n-ph="auth_password_ph" placeholder="Mot de passe" autocomplete="current-password">
+    <p class="modal-error" id="authError"></p>
+    <button class="btn btn-primary" id="authSubmit" style="width:100%; justify-content:center;" data-i18n="auth_login_btn">Se connecter</button>
+    <p class="modal-switch">
+      <span id="authSwitchLabel" data-i18n="auth_switch_to_signup_label">Pas encore de compte ?</span>
+      <button id="authSwitchBtn" data-i18n="auth_switch_to_signup_btn">Créer un compte</button>
+    </p>
+  </div>
+</div>
 
 <main class="snap">
 
@@ -485,7 +531,17 @@
       contact_eyebrow:"Contact", contact_title:"Besoin d'aide ?",
       contact_lede:"Une question, un bug, une idée ? Écrivez-moi directement.",
       contact_email_label:"Email direct", contact_ph_name:"Votre nom", contact_ph_message:"Votre message", contact_send:"Envoyer",
-      lang_name_for_ai:"français"
+      lang_name_for_ai:"français",
+      account_login:"Se connecter", account_logout:"Déconnexion",
+      auth_login_title:"Connexion", auth_login_sub:"Retrouve tes séances et tableaux sur tous tes appareils.",
+      auth_signup_title:"Créer un compte", auth_signup_sub:"Tes séances et tableaux seront synchronisés partout.",
+      auth_email_ph:"Email", auth_password_ph:"Mot de passe (6 caractères min.)",
+      auth_login_btn:"Se connecter", auth_signup_btn:"Créer mon compte",
+      auth_switch_to_signup_label:"Pas encore de compte ?", auth_switch_to_signup_btn:"Créer un compte",
+      auth_switch_to_login_label:"Déjà un compte ?", auth_switch_to_login_btn:"Se connecter",
+      auth_error_generic:"Une erreur est survenue. Vérifie tes identifiants.",
+      auth_signup_check_email:"Compte créé ! Vérifie ta boîte mail pour confirmer.",
+      sync_status:"Synchronisé sur ton compte"
     },
     en: {
       nav_home:"Home", nav_seances:"Sessions", nav_board:"Board", nav_plan:"Plan", nav_contact:"Contact",
@@ -517,7 +573,17 @@
       contact_eyebrow:"Contact", contact_title:"Need help?",
       contact_lede:"A question, a bug, an idea? Write to me directly.",
       contact_email_label:"Direct email", contact_ph_name:"Your name", contact_ph_message:"Your message", contact_send:"Send",
-      lang_name_for_ai:"English"
+      lang_name_for_ai:"English",
+      account_login:"Log in", account_logout:"Log out",
+      auth_login_title:"Log in", auth_login_sub:"Get your sessions and boards on every device.",
+      auth_signup_title:"Create an account", auth_signup_sub:"Your sessions and boards will sync everywhere.",
+      auth_email_ph:"Email", auth_password_ph:"Password (6 characters min.)",
+      auth_login_btn:"Log in", auth_signup_btn:"Create my account",
+      auth_switch_to_signup_label:"No account yet?", auth_switch_to_signup_btn:"Create an account",
+      auth_switch_to_login_label:"Already have an account?", auth_switch_to_login_btn:"Log in",
+      auth_error_generic:"Something went wrong. Check your details.",
+      auth_signup_check_email:"Account created! Check your inbox to confirm.",
+      sync_status:"Synced to your account"
     },
     nl: {
       nav_home:"Start", nav_seances:"Trainingen", nav_board:"Bord", nav_plan:"Abonnement", nav_contact:"Contact",
@@ -549,7 +615,17 @@
       contact_eyebrow:"Contact", contact_title:"Hulp nodig?",
       contact_lede:"Een vraag, een bug, een idee? Schrijf me rechtstreeks.",
       contact_email_label:"Rechtstreekse e-mail", contact_ph_name:"Je naam", contact_ph_message:"Je bericht", contact_send:"Verzenden",
-      lang_name_for_ai:"Nederlands"
+      lang_name_for_ai:"Nederlands",
+      account_login:"Inloggen", account_logout:"Uitloggen",
+      auth_login_title:"Inloggen", auth_login_sub:"Vind je trainingen en borden terug op elk toestel.",
+      auth_signup_title:"Account aanmaken", auth_signup_sub:"Je trainingen en borden worden overal gesynchroniseerd.",
+      auth_email_ph:"E-mail", auth_password_ph:"Wachtwoord (min. 6 tekens)",
+      auth_login_btn:"Inloggen", auth_signup_btn:"Account aanmaken",
+      auth_switch_to_signup_label:"Nog geen account?", auth_switch_to_signup_btn:"Account aanmaken",
+      auth_switch_to_login_label:"Al een account?", auth_switch_to_login_btn:"Inloggen",
+      auth_error_generic:"Er ging iets mis. Controleer je gegevens.",
+      auth_signup_check_email:"Account aangemaakt! Controleer je mailbox ter bevestiging.",
+      sync_status:"Gesynchroniseerd met je account"
     },
     de: {
       nav_home:"Start", nav_seances:"Einheiten", nav_board:"Board", nav_plan:"Abo", nav_contact:"Kontakt",
@@ -581,7 +657,17 @@
       contact_eyebrow:"Kontakt", contact_title:"Brauchst du Hilfe?",
       contact_lede:"Eine Frage, ein Bug, eine Idee? Schreib mir direkt.",
       contact_email_label:"Direkte E-Mail", contact_ph_name:"Dein Name", contact_ph_message:"Deine Nachricht", contact_send:"Senden",
-      lang_name_for_ai:"Deutsch"
+      lang_name_for_ai:"Deutsch",
+      account_login:"Anmelden", account_logout:"Abmelden",
+      auth_login_title:"Anmelden", auth_login_sub:"Finde deine Einheiten und Boards auf jedem Gerät wieder.",
+      auth_signup_title:"Konto erstellen", auth_signup_sub:"Deine Einheiten und Boards werden überall synchronisiert.",
+      auth_email_ph:"E-Mail", auth_password_ph:"Passwort (mind. 6 Zeichen)",
+      auth_login_btn:"Anmelden", auth_signup_btn:"Konto erstellen",
+      auth_switch_to_signup_label:"Noch kein Konto?", auth_switch_to_signup_btn:"Konto erstellen",
+      auth_switch_to_login_label:"Schon ein Konto?", auth_switch_to_login_btn:"Anmelden",
+      auth_error_generic:"Etwas ist schiefgelaufen. Prüfe deine Angaben.",
+      auth_signup_check_email:"Konto erstellt! Bestätige es über deine E-Mail.",
+      sync_status:"Mit deinem Konto synchronisiert"
     }
   };
   let currentLang = 'fr';
@@ -593,8 +679,10 @@
     document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.dataset.i18n); });
     document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder = t(el.dataset.i18nPh); });
     document.querySelectorAll('[data-i18n-title]').forEach(el=>{ el.title = t(el.dataset.i18nTitle); });
-    if(!seances.length){ const e = document.querySelector('#seanceList .empty-note'); if(e) e.textContent = t('seances_empty'); }
+    if(typeof seances !== 'undefined' && !seances.length){ const e = document.querySelector('#seanceList .empty-note'); if(e) e.textContent = t('seances_empty'); }
     document.getElementById('langSelect').value = currentLang;
+    if(typeof updateAccountUI === 'function') updateAccountUI();
+    if(typeof renderAuthMode === 'function' && document.getElementById('authModal').classList.contains('open')) renderAuthMode();
   }
 
   const langSelect = document.getElementById('langSelect');
@@ -609,19 +697,110 @@
     }catch(e){ applyLang((navigator.language || 'fr').slice(0,2)); }
   })();
 
+  // ---------- AUTH (Supabase) ----------
+  const SUPABASE_URL = 'https://xdmsvslnmiwtzcjzrocf.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhkbXN2c2xubWl3dHpjanpyb2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NjcyNDIsImV4cCI6MjEwMjE0MzI0Mn0._VdHxm2vWnfKkk-qSmVtGohrL5BVhAVYVemqVY51EGo';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let currentUser = null;
+  let authMode = 'login';
+
+  const accountBtn = document.getElementById('accountBtn');
+  const authModal = document.getElementById('authModal');
+  const authModalClose = document.getElementById('authModalClose');
+  const authEmail = document.getElementById('authEmail');
+  const authPassword = document.getElementById('authPassword');
+  const authError = document.getElementById('authError');
+  const authSubmit = document.getElementById('authSubmit');
+  const authSwitchBtn = document.getElementById('authSwitchBtn');
+  const authSwitchLabel = document.getElementById('authSwitchLabel');
+
+  function openAuthModal(mode){
+    authMode = mode;
+    authError.textContent = '';
+    authEmail.value = ''; authPassword.value = '';
+    renderAuthMode();
+    authModal.classList.add('open');
+  }
+  function closeAuthModal(){ authModal.classList.remove('open'); }
+  function renderAuthMode(){
+    const isLogin = authMode === 'login';
+    document.getElementById('authTitle').textContent = t(isLogin ? 'auth_login_title' : 'auth_signup_title');
+    document.getElementById('authSub').textContent = t(isLogin ? 'auth_login_sub' : 'auth_signup_sub');
+    authSubmit.textContent = t(isLogin ? 'auth_login_btn' : 'auth_signup_btn');
+    authSwitchLabel.textContent = t(isLogin ? 'auth_switch_to_signup_label' : 'auth_switch_to_login_label');
+    authSwitchBtn.textContent = t(isLogin ? 'auth_switch_to_signup_btn' : 'auth_switch_to_login_btn');
+  }
+
+  accountBtn.addEventListener('click', ()=>{
+    if(currentUser){ sb.auth.signOut(); }
+    else{ openAuthModal('login'); }
+  });
+  authModalClose.addEventListener('click', closeAuthModal);
+  authModal.addEventListener('click', e=>{ if(e.target === authModal) closeAuthModal(); });
+  authSwitchBtn.addEventListener('click', ()=>{ authMode = authMode === 'login' ? 'signup' : 'login'; authError.textContent=''; renderAuthMode(); });
+
+  authSubmit.addEventListener('click', async ()=>{
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+    if(!email || password.length < 6){ authError.textContent = t('auth_error_generic'); return; }
+    authSubmit.disabled = true;
+    try{
+      if(authMode === 'login'){
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if(error) throw error;
+        closeAuthModal();
+      }else{
+        const { error } = await sb.auth.signUp({ email, password });
+        if(error) throw error;
+        authError.style.color = 'var(--amber)';
+        authError.textContent = t('auth_signup_check_email');
+      }
+    }catch(err){
+      authError.style.color = '#E8735C';
+      authError.textContent = t('auth_error_generic');
+    }finally{
+      authSubmit.disabled = false;
+    }
+  });
+
+  function updateAccountUI(){
+    if(currentUser){
+      accountBtn.textContent = t('account_logout');
+      accountBtn.title = currentUser.email;
+    }else{
+      accountBtn.textContent = t('account_login');
+      accountBtn.removeAttribute('title');
+    }
+  }
+
+  sb.auth.onAuthStateChange((event, session)=>{
+    currentUser = session ? session.user : null;
+    updateAccountUI();
+    loadSeances();
+    loadBoardForSport(currentSport);
+  });
+
   // ---------- SEANCES ----------
   const seanceForm = document.getElementById('seanceForm');
   const seanceList = document.getElementById('seanceList');
   let seances = [];
 
   async function loadSeances(){
-    try{
-      const res = await window.storage.get('seances', false);
-      seances = res ? JSON.parse(res.value) : [];
-    }catch(e){ seances = []; }
+    if(currentUser){
+      try{
+        const { data, error } = await sb.from('seances').select('*').order('created_at', { ascending:false });
+        if(error) throw error;
+        seances = data || [];
+      }catch(e){ seances = []; console.error('Erreur de chargement des séances', e); }
+    }else{
+      try{
+        const res = await window.storage.get('seances', false);
+        seances = res ? JSON.parse(res.value) : [];
+      }catch(e){ seances = []; }
+    }
     renderSeances();
   }
-  async function saveSeances(){
+  async function saveSeancesLocal(){
     try{ await window.storage.set('seances', JSON.stringify(seances), false); }
     catch(e){ console.error('Erreur de sauvegarde des séances', e); }
   }
@@ -630,35 +809,53 @@
       seanceList.innerHTML = `<p class="empty-note">${t('seances_empty')}</p>`;
       return;
     }
-    seanceList.innerHTML = seances.map((s,i)=>`
+    seanceList.innerHTML = seances.map((s)=>`
       <div class="seance-card">
         <div>
           <div class="meta">${escapeHtml(s.date)}</div>
           <div class="theme">${escapeHtml(s.theme)}</div>
           ${s.notes ? `<div class="notes">${escapeHtml(s.notes)}</div>` : ''}
         </div>
-        <button class="icon-btn" data-idx="${i}">×</button>
+        <button class="icon-btn" data-id="${s.id}">×</button>
       </div>
     `).join('');
     seanceList.querySelectorAll('.icon-btn').forEach(b=>{
-      b.addEventListener('click', ()=>{
-        seances.splice(parseInt(b.dataset.idx),1);
-        saveSeances(); renderSeances();
+      b.addEventListener('click', async ()=>{
+        const id = b.dataset.id;
+        if(currentUser){
+          try{ await sb.from('seances').delete().eq('id', id); }
+          catch(e){ console.error('Erreur de suppression', e); }
+          seances = seances.filter(s=> String(s.id) !== id);
+        }else{
+          seances = seances.filter(s=> String(s.id) !== id);
+          saveSeancesLocal();
+        }
+        renderSeances();
       });
     });
   }
   function escapeHtml(str){
     const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
   }
-  seanceForm.addEventListener('submit', e=>{
+  seanceForm.addEventListener('submit', async e=>{
     e.preventDefault();
-    seances.unshift({
+    const entry = {
       date: document.getElementById('s-date').value,
       theme: document.getElementById('s-theme').value,
       notes: document.getElementById('s-notes').value
-    });
+    };
     seanceForm.reset();
-    saveSeances(); renderSeances();
+    if(currentUser){
+      try{
+        const { data, error } = await sb.from('seances').insert({ ...entry, user_id: currentUser.id }).select().single();
+        if(error) throw error;
+        seances.unshift(data);
+      }catch(e){ console.error('Erreur d\'ajout de séance', e); }
+    }else{
+      seances.unshift({ id: crypto.randomUUID(), ...entry });
+      saveSeancesLocal();
+    }
+    renderSeances();
   });
   loadSeances();
 
@@ -812,18 +1009,38 @@
 
   document.getElementById('undoBtn').addEventListener('click', ()=>{ objects.pop(); redraw(); });
   document.getElementById('clearBtn').addEventListener('click', ()=>{ objects = []; tokenCount = 0; redraw(); });
-  document.getElementById('saveBtn').addEventListener('click', async ()=>{
-    try{ await window.storage.set('board_'+currentSport, JSON.stringify(objects), false); }
-    catch(e){ console.error('Erreur d\'enregistrement du tableau', e); }
-  });
-  document.getElementById('loadBtn').addEventListener('click', async ()=>{
-    try{
-      const res = await window.storage.get('board_'+currentSport, false);
-      objects = res ? JSON.parse(res.value) : [];
-      tokenCount = objects.filter(o=>o.type==='token').length;
-      redraw();
-    }catch(e){ objects = []; redraw(); }
-  });
+  document.getElementById('saveBtn').addEventListener('click', ()=> saveBoardForSport(currentSport));
+  document.getElementById('loadBtn').addEventListener('click', ()=> loadBoardForSport(currentSport));
+
+  async function saveBoardForSport(sport){
+    if(currentUser){
+      try{
+        await sb.from('boards').upsert(
+          { user_id: currentUser.id, sport, data: objects, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id,sport' }
+        );
+      }catch(e){ console.error('Erreur d\'enregistrement du tableau', e); }
+    }else{
+      try{ await window.storage.set('board_'+sport, JSON.stringify(objects), false); }
+      catch(e){ console.error('Erreur d\'enregistrement du tableau', e); }
+    }
+  }
+  async function loadBoardForSport(sport){
+    if(currentUser){
+      try{
+        const { data, error } = await sb.from('boards').select('data').eq('sport', sport).maybeSingle();
+        if(error) throw error;
+        objects = (data && data.data) ? data.data : [];
+      }catch(e){ objects = []; console.error('Erreur de chargement du tableau', e); }
+    }else{
+      try{
+        const res = await window.storage.get('board_'+sport, false);
+        objects = res ? JSON.parse(res.value) : [];
+      }catch(e){ objects = []; }
+    }
+    tokenCount = objects.filter(o=>o.type==='token').length;
+    redraw();
+  }
 
   // init after fonts/layout settle
   requestAnimationFrame(()=> setTimeout(resizeCanvas, 50));
