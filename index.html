@@ -572,7 +572,8 @@
       auth_switch_to_login_label:"Déjà un compte ?", auth_switch_to_login_btn:"Se connecter",
       auth_error_generic:"Une erreur est survenue. Vérifie tes identifiants.",
       auth_signup_check_email:"Compte créé ! Vérifie ta boîte mail pour confirmer.",
-      sync_status:"Synchronisé sur ton compte"
+      sync_status:"Synchronisé sur ton compte",
+      pro_required:"Fonctionnalité réservée aux comptes Pro. Passe Pro pour en profiter."
     },
     en: {
       nav_home:"Home", nav_seances:"Sessions", nav_board:"Board", nav_plan:"Plan", nav_contact:"Contact",
@@ -614,7 +615,8 @@
       auth_switch_to_login_label:"Already have an account?", auth_switch_to_login_btn:"Log in",
       auth_error_generic:"Something went wrong. Check your details.",
       auth_signup_check_email:"Account created! Check your inbox to confirm.",
-      sync_status:"Synced to your account"
+      sync_status:"Synced to your account",
+      pro_required:"This feature is for Pro accounts. Upgrade to Pro to unlock it."
     },
     nl: {
       nav_home:"Start", nav_seances:"Trainingen", nav_board:"Bord", nav_plan:"Abonnement", nav_contact:"Contact",
@@ -656,7 +658,8 @@
       auth_switch_to_login_label:"Al een account?", auth_switch_to_login_btn:"Inloggen",
       auth_error_generic:"Er ging iets mis. Controleer je gegevens.",
       auth_signup_check_email:"Account aangemaakt! Controleer je mailbox ter bevestiging.",
-      sync_status:"Gesynchroniseerd met je account"
+      sync_status:"Gesynchroniseerd met je account",
+      pro_required:"Deze functie is voor Pro-accounts. Upgrade naar Pro om ze te gebruiken."
     },
     de: {
       nav_home:"Start", nav_seances:"Einheiten", nav_board:"Board", nav_plan:"Abo", nav_contact:"Kontakt",
@@ -698,7 +701,8 @@
       auth_switch_to_login_label:"Schon ein Konto?", auth_switch_to_login_btn:"Anmelden",
       auth_error_generic:"Etwas ist schiefgelaufen. Prüfe deine Angaben.",
       auth_signup_check_email:"Konto erstellt! Bestätige es über deine E-Mail.",
-      sync_status:"Mit deinem Konto synchronisiert"
+      sync_status:"Mit deinem Konto synchronisiert",
+      pro_required:"Diese Funktion ist Pro-Konten vorbehalten. Upgrade auf Pro, um sie freizuschalten."
     }
   };
   let currentLang = 'fr';
@@ -796,7 +800,7 @@
 
   function updateAccountUI(){
     if(currentUser){
-      accountBtn.textContent = t('account_logout');
+      accountBtn.textContent = t('account_logout') + (currentIsPro ? ' · PRO' : '');
       accountBtn.title = currentUser.email;
     }else{
       accountBtn.textContent = t('account_login');
@@ -804,9 +808,35 @@
     }
   }
 
+  let currentIsPro = false;
+  async function ensureProfile(){
+    if(!currentUser){ currentIsPro = false; updateAccountUI(); return; }
+    try{
+      let { data, error } = await sb.from('profiles').select('is_pro').eq('user_id', currentUser.id).maybeSingle();
+      if(error) throw error;
+      if(!data){
+        const ins = await sb.from('profiles').insert({ user_id: currentUser.id, is_pro:false }).select('is_pro').maybeSingle();
+        data = ins.data;
+      }
+      currentIsPro = !!(data && data.is_pro);
+    }catch(e){
+      currentIsPro = false;
+      console.error('Erreur de chargement du profil', e);
+    }
+    updateAccountUI();
+  }
+
+  function requireProOrPrompt(){
+    if(currentIsPro) return true;
+    alert(t('pro_required'));
+    document.getElementById('abonnement').scrollIntoView({ behavior:'smooth' });
+    return false;
+  }
+
   sb.auth.onAuthStateChange((event, session)=>{
     currentUser = session ? session.user : null;
     updateAccountUI();
+    ensureProfile();
     loadSeances();
     loadBoardForSport(currentSport);
   });
@@ -1101,6 +1131,7 @@
   document.getElementById('exportBtn').addEventListener('click', exportBoardHD);
 
   function exportBoardHD(){
+    if(!requireProOrPrompt()) return;
     const activeSvg = document.querySelector('.field.active');
     const svgText = new XMLSerializer().serializeToString(activeSvg);
     const svgUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgText)));
@@ -1161,6 +1192,7 @@
   const aiOutput = document.getElementById('aiOutput');
   const aiPrompt = document.getElementById('aiPrompt');
   aiBtn.addEventListener('click', async ()=>{
+    if(!requireProOrPrompt()) return;
     const need = aiPrompt.value.trim();
     if(!need){ aiOutput.textContent = t('ai_empty'); return; }
     aiOutput.textContent = t('ai_wait');
