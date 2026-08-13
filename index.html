@@ -236,6 +236,8 @@
     .toolbar{flex-direction:row; overflow-x:auto; width:100%;}
     .swatches{flex-direction:row; border-top:none; border-left:1px solid var(--line); padding-left:10px; padding-top:0;}
     .plans{grid-template-columns:1fr;}
+    main.snap{scroll-snap-type:none;}
+    section.panel{scroll-snap-align:none; min-height:auto; padding-top:calc(var(--header-h) + 32px); padding-bottom:48px;}
   }
   @media (prefers-reduced-motion: reduce){
     main.snap{scroll-behavior:auto;}
@@ -364,6 +366,9 @@
         </button>
         <button class="tool" data-tool="ball" title="Ballon" data-i18n-title="tool_ball">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg>
+        </button>
+        <button class="tool" data-tool="eraser" title="Gomme" data-i18n-title="tool_eraser">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H9L4 15c-.5-.5-.5-1.5 0-2l9-9c.5-.5 1.5-.5 2 0l6 6c.5.5.5 1.5 0 2l-8 8"/><path d="M13 20 8 15"/></svg>
         </button>
         <div class="swatches" id="swatches">
           <button class="swatch active" data-color="#F5F1E6" style="background:#F5F1E6"></button>
@@ -532,7 +537,7 @@
       seances_add:"Ajouter la séance", seances_empty:"Aucune séance pour l'instant.",
       board_eyebrow:"Tactique", board_title:"Tableau blanc", board_lede:"Choisissez un terrain, dessinez vos schémas.",
       sport_football:"Football", sport_basket:"Basketball", sport_gazon:"Hockey sur gazon", sport_glace:"Hockey sur glace", sport_rugby:"Rugby",
-      tool_pen:"Craie", tool_arrow:"Flèche", tool_token:"Joueur", tool_ball:"Ballon",
+      tool_pen:"Craie", tool_arrow:"Flèche", tool_token:"Joueur", tool_ball:"Ballon", tool_eraser:"Gomme",
       ai_title:"Assistant IA", ai_badge:"Pro",
       ai_desc:"Décrivez un besoin, l'assistant propose un exercice adapté au sport sélectionné.",
       ai_ph:"Ex. exercice de passes pour débutantes, 10 min", ai_btn:"Proposer un exercice",
@@ -574,7 +579,7 @@
       seances_add:"Add session", seances_empty:"No sessions yet.",
       board_eyebrow:"Tactics", board_title:"Whiteboard", board_lede:"Pick a field, sketch your setups.",
       sport_football:"Football", sport_basket:"Basketball", sport_gazon:"Field hockey", sport_glace:"Ice hockey", sport_rugby:"Rugby",
-      tool_pen:"Chalk", tool_arrow:"Arrow", tool_token:"Player", tool_ball:"Ball",
+      tool_pen:"Chalk", tool_arrow:"Arrow", tool_token:"Player", tool_ball:"Ball", tool_eraser:"Eraser",
       ai_title:"AI Assistant", ai_badge:"Pro",
       ai_desc:"Describe what you need, the assistant suggests a drill for the selected sport.",
       ai_ph:"E.g. passing drill for beginners, 10 min", ai_btn:"Suggest a drill",
@@ -616,7 +621,7 @@
       seances_add:"Training toevoegen", seances_empty:"Nog geen trainingen.",
       board_eyebrow:"Tactiek", board_title:"Whiteboard", board_lede:"Kies een veld, teken je opstellingen.",
       sport_football:"Voetbal", sport_basket:"Basketbal", sport_gazon:"Veldhockey", sport_glace:"IJshockey", sport_rugby:"Rugby",
-      tool_pen:"Krijt", tool_arrow:"Pijl", tool_token:"Speler", tool_ball:"Bal",
+      tool_pen:"Krijt", tool_arrow:"Pijl", tool_token:"Speler", tool_ball:"Bal", tool_eraser:"Gum",
       ai_title:"AI-assistent", ai_badge:"Pro",
       ai_desc:"Beschrijf je behoefte, de assistent stelt een oefening voor bij de gekozen sport.",
       ai_ph:"Bv. pass-oefening voor beginners, 10 min", ai_btn:"Oefening voorstellen",
@@ -658,7 +663,7 @@
       seances_add:"Einheit hinzufügen", seances_empty:"Noch keine Einheiten.",
       board_eyebrow:"Taktik", board_title:"Whiteboard", board_lede:"Wähle ein Spielfeld, zeichne deine Systeme.",
       sport_football:"Fußball", sport_basket:"Basketball", sport_gazon:"Feldhockey", sport_glace:"Eishockey", sport_rugby:"Rugby",
-      tool_pen:"Kreide", tool_arrow:"Pfeil", tool_token:"Spieler", tool_ball:"Ball",
+      tool_pen:"Kreide", tool_arrow:"Pfeil", tool_token:"Spieler", tool_ball:"Ball", tool_eraser:"Radiergummi",
       ai_title:"KI-Assistent", ai_badge:"Pro",
       ai_desc:"Beschreibe deinen Bedarf, der Assistent schlägt eine Übung für die gewählte Sportart vor.",
       ai_ph:"Z. B. Passübung für Anfänger, 10 Min", ai_btn:"Übung vorschlagen",
@@ -952,6 +957,36 @@
     return null;
   }
 
+  function distToSegment(p, a, b){
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const lenSq = dx*dx + dy*dy;
+    let t = lenSq ? ((p.x-a.x)*dx + (p.y-a.y)*dy) / lenSq : 0;
+    t = Math.max(0, Math.min(1, t));
+    const cx = a.x + t*dx, cy = a.y + t*dy;
+    return Math.hypot(p.x-cx, p.y-cy);
+  }
+
+  function eraseAt(p){
+    for(let i = objects.length - 1; i >= 0; i--){
+      const o = objects[i];
+      if((o.type === 'token' || o.type === 'ball') && Math.hypot(o.x-p.x, o.y-p.y) < 18){
+        objects.splice(i,1); redraw(); return;
+      }
+      if(o.type === 'arrow' && distToSegment(p, {x:o.x1,y:o.y1}, {x:o.x2,y:o.y2}) < 14){
+        objects.splice(i,1); redraw(); return;
+      }
+      if(o.type === 'stroke'){
+        for(let k=0; k<o.points.length-1; k++){
+          if(distToSegment(p, o.points[k], o.points[k+1]) < 14){
+            objects.splice(i,1); redraw(); return;
+          }
+        }
+      }
+    }
+  }
+
+  let erasing = false;
+
   canvas.addEventListener('pointerdown', e=>{
     const p = pos(e);
     if(currentTool === 'pen'){
@@ -968,6 +1003,9 @@
       const hit = hitToken(p);
       if(hit){ dragTarget = hit; }
       else { objects.push({type:'ball', x:p.x, y:p.y}); redraw(); }
+    } else if(currentTool === 'eraser'){
+      erasing = true;
+      eraseAt(p);
     }
   });
   canvas.addEventListener('pointermove', e=>{
@@ -975,6 +1013,7 @@
     if(drawing && activeStroke){ activeStroke.points.push(p); redraw(); }
     else if(arrowStart){ redraw(); drawArrowPreview(arrowStart, p); }
     else if(dragTarget){ dragTarget.x = p.x; dragTarget.y = p.y; redraw(); }
+    else if(erasing){ eraseAt(p); }
   });
   window.addEventListener('pointerup', e=>{
     if(arrowStart){
@@ -984,6 +1023,7 @@
       }
       arrowStart = null;
     }
+    erasing = false;
     drawing = false; activeStroke = null; dragTarget = null;
     redraw();
   });
