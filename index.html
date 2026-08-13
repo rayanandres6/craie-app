@@ -923,7 +923,6 @@
   let activeStroke = null;
   let dragTarget = null;
   let arrowStart = null;
-  let tokenCount = 0;
 
   function resizeCanvas(){
     const rect = wrap.getBoundingClientRect();
@@ -1017,7 +1016,7 @@
     } else if(currentTool === 'token'){
       const hit = hitToken(p);
       if(hit){ dragTarget = hit; }
-      else { tokenCount++; objects.push({type:'token', x:p.x, y:p.y, color: currentColor, label: tokenCount}); redraw(); }
+      else { const num = objects.filter(o=>o.type==='token' && o.color===currentColor).length + 1; objects.push({type:'token', x:p.x, y:p.y, color: currentColor, label: num}); redraw(); }
     } else if(currentTool === 'ball'){
       const hit = hitToken(p);
       if(hit){ dragTarget = hit; }
@@ -1096,7 +1095,7 @@
   }
 
   document.getElementById('undoBtn').addEventListener('click', ()=>{ objects.pop(); redraw(); });
-  document.getElementById('clearBtn').addEventListener('click', ()=>{ objects = []; tokenCount = 0; redraw(); });
+  document.getElementById('clearBtn').addEventListener('click', ()=>{ objects = []; redraw(); });
   document.getElementById('saveBtn').addEventListener('click', ()=> saveBoardForSport(currentSport));
   document.getElementById('loadBtn').addEventListener('click', ()=> loadBoardForSport(currentSport));
   document.getElementById('exportBtn').addEventListener('click', exportBoardHD);
@@ -1151,7 +1150,6 @@
         objects = res ? JSON.parse(res.value) : [];
       }catch(e){ objects = []; }
     }
-    tokenCount = objects.filter(o=>o.type==='token').length;
     redraw();
   }
 
