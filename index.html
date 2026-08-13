@@ -192,6 +192,11 @@
   .tool.active{background:var(--amber-dim); border-color:var(--amber); color:var(--amber);}
   .tool:hover{color:var(--chalk);}
   .swatches{display:flex; flex-direction:column; gap:6px; padding-top:6px; border-top:1px solid var(--line); width:100%; align-items:center;}
+  .thickness-wrap{display:flex; flex-direction:column; align-items:center; gap:4px; padding-top:6px; border-top:1px solid var(--line); width:100%;}
+  .thickness-wrap.hidden{display:none;}
+  #thicknessSlider{
+    width:44px; height:16px; accent-color:var(--amber); background:transparent; cursor:pointer;
+  }
   .swatch{width:20px; height:20px; border-radius:50%; border:2px solid transparent;}
   .swatch.active{border-color:var(--chalk);}
 
@@ -375,6 +380,9 @@
           <button class="swatch" data-color="#E7A94C" style="background:#E7A94C"></button>
           <button class="swatch" data-color="#7FC8E8" style="background:#7FC8E8"></button>
           <button class="swatch" data-color="#E8735C" style="background:#E8735C"></button>
+        </div>
+        <div class="thickness-wrap" id="thicknessWrap">
+          <input type="range" id="thicknessSlider" min="2" max="16" value="3" step="1" aria-label="Épaisseur">
         </div>
       </div>
 
@@ -910,6 +918,7 @@
   let objects = [];
   let currentTool = 'pen';
   let currentColor = '#F5F1E6';
+  let currentThickness = 3;
   let drawing = false;
   let activeStroke = null;
   let dragTarget = null;
@@ -924,13 +933,22 @@
   }
   window.addEventListener('resize', resizeCanvas);
 
+  const thicknessWrap = document.getElementById('thicknessWrap');
+  const thicknessSlider = document.getElementById('thicknessSlider');
+  function updateThicknessVisibility(){
+    thicknessWrap.classList.toggle('hidden', !(currentTool === 'pen' || currentTool === 'eraser'));
+  }
+  thicknessSlider.addEventListener('input', ()=>{ currentThickness = parseInt(thicknessSlider.value, 10); });
+
   document.querySelectorAll('.tool').forEach(t=>{
     t.addEventListener('click', ()=>{
       document.querySelectorAll('.tool').forEach(x=>x.classList.remove('active'));
       t.classList.add('active');
       currentTool = t.dataset.tool;
+      updateThicknessVisibility();
     });
   });
+  updateThicknessVisibility();
   document.querySelectorAll('.swatch').forEach(s=>{
     s.addEventListener('click', ()=>{
       document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('active'));
@@ -967,17 +985,18 @@
   }
 
   function eraseAt(p){
+    const radius = 10 + currentThickness*3;
     for(let i = objects.length - 1; i >= 0; i--){
       const o = objects[i];
-      if((o.type === 'token' || o.type === 'ball') && Math.hypot(o.x-p.x, o.y-p.y) < 18){
+      if((o.type === 'token' || o.type === 'ball') && Math.hypot(o.x-p.x, o.y-p.y) < radius){
         objects.splice(i,1); redraw(); return;
       }
-      if(o.type === 'arrow' && distToSegment(p, {x:o.x1,y:o.y1}, {x:o.x2,y:o.y2}) < 14){
+      if(o.type === 'arrow' && distToSegment(p, {x:o.x1,y:o.y1}, {x:o.x2,y:o.y2}) < radius){
         objects.splice(i,1); redraw(); return;
       }
       if(o.type === 'stroke'){
         for(let k=0; k<o.points.length-1; k++){
-          if(distToSegment(p, o.points[k], o.points[k+1]) < 14){
+          if(distToSegment(p, o.points[k], o.points[k+1]) < radius){
             objects.splice(i,1); redraw(); return;
           }
         }
@@ -991,7 +1010,7 @@
     const p = pos(e);
     if(currentTool === 'pen'){
       drawing = true;
-      activeStroke = {type:'stroke', color: currentColor, points:[p]};
+      activeStroke = {type:'stroke', color: currentColor, width: currentThickness, points:[p]};
       objects.push(activeStroke);
     } else if(currentTool === 'arrow'){
       arrowStart = p;
@@ -1052,7 +1071,7 @@
         targetCtx.beginPath();
         targetCtx.moveTo(o.points[0].x, o.points[0].y);
         o.points.forEach(pt=> targetCtx.lineTo(pt.x, pt.y));
-        targetCtx.strokeStyle = o.color; targetCtx.lineWidth = 3; targetCtx.lineCap='round'; targetCtx.lineJoin='round';
+        targetCtx.strokeStyle = o.color; targetCtx.lineWidth = o.width || 3; targetCtx.lineCap='round'; targetCtx.lineJoin='round';
         targetCtx.stroke();
       } else if(o.type === 'arrow'){
         targetCtx.beginPath(); targetCtx.moveTo(o.x1,o.y1); targetCtx.lineTo(o.x2,o.y2);
