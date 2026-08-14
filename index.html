@@ -458,11 +458,10 @@
       </div>
 
       <div class="ai-panel">
-        <h3><span data-i18n="ai_title">Assistant IA</span> <span class="badge" data-i18n="ai_badge">Pro</span></h3>
-        <p style="font-size:13px; color:var(--chalk-dim); margin:0;" data-i18n="ai_desc">Décrivez un besoin, l'assistant propose un exercice adapté au sport sélectionné.</p>
-        <textarea id="aiPrompt" data-i18n-ph="ai_ph" placeholder="Ex. exercice de passes pour débutantes, 10 min"></textarea>
-        <button class="btn btn-primary" id="aiBtn" style="justify-content:center;" data-i18n="ai_btn">Proposer un exercice</button>
-        <div class="ai-output" id="aiOutput"></div>
+        <h3><span data-i18n="replay_title">Rejeu animé</span> <span class="badge" data-i18n="ai_badge">Pro</span></h3>
+        <p style="font-size:13px; color:var(--chalk-dim); margin:0;" data-i18n="replay_desc">Rejoue ton schéma trait par trait, dans l'ordre où tu l'as dessiné — idéal pour l'expliquer à l'équipe.</p>
+        <button class="btn btn-primary" id="replayBtn" style="justify-content:center;" data-i18n="replay_btn">▶ Rejouer le tableau</button>
+        <p style="font-size:12px; color:var(--chalk-dim); margin:0;" id="replayStatus"></p>
       </div>
     </div>
 
@@ -546,18 +545,16 @@
       board_eyebrow:"Tactique", board_title:"Tableau blanc", board_lede:"Choisissez un terrain, dessinez vos schémas.",
       sport_football:"Football", sport_basket:"Basketball", sport_gazon:"Hockey sur gazon", sport_glace:"Hockey sur glace", sport_rugby:"Rugby",
       tool_pen:"Craie", tool_arrow:"Flèche", tool_token:"Joueur", tool_ball:"Ballon", tool_eraser:"Gomme",
-      ai_title:"Assistant IA", ai_badge:"Pro",
-      ai_desc:"Décrivez un besoin, l'assistant propose un exercice adapté au sport sélectionné.",
-      ai_ph:"Ex. exercice de passes pour débutantes, 10 min", ai_btn:"Proposer un exercice",
-      ai_wait:"Génération en cours...", ai_empty:"Décrivez d'abord votre besoin ci-dessus.",
-      ai_error:"Erreur de connexion à l'assistant. Réessayez.", ai_none:"Pas de réponse, réessayez.",
+      replay_title:"Rejeu animé", ai_badge:"Pro",
+      replay_desc:"Rejoue ton schéma trait par trait, dans l'ordre où tu l'as dessiné — idéal pour l'expliquer à l'équipe.",
+      replay_btn:"▶ Rejouer le tableau", replay_playing:"Lecture en cours...", replay_empty:"Dessine d'abord un schéma sur le tableau.",
       board_undo:"Annuler", board_clear:"Tout effacer", board_save:"Enregistrer", board_load:"Charger", board_export:"Exporter HD",
       plans_eyebrow:"Abonnement", plans_title:"Gratuit ou Pro",
-      plans_lede:"Le tableau et le planning restent gratuits. Pro ajoute l'assistant IA et l'export.",
+      plans_lede:"Le tableau et le planning restent gratuits. Pro ajoute le rejeu animé et l'export.",
       plan_free_name:"Gratuit", plan_pro_name:"Pro", plan_per_month:" /mois",
       plan_free_1:"Tableau blanc, 5 sports", plan_free_2:"Planning de séances illimité", plan_free_3:"Sauvegarde sur cet appareil",
       plan_free_btn:"Plan actuel",
-      plan_pro_1:"Assistant IA illimité", plan_pro_2:"Export du tableau en image HD", plan_pro_3:"Sauvegarde multi-équipes", plan_pro_4:"Support prioritaire",
+      plan_pro_1:"Rejeu animé du tableau", plan_pro_2:"Export du tableau en image HD", plan_pro_3:"Sauvegarde multi-équipes", plan_pro_4:"Support prioritaire",
       plan_pro_btn:"Passer Pro",
       contact_eyebrow:"Contact", contact_title:"Besoin d'aide ?",
       contact_lede:"Une question, un bug, une idée ? Écrivez-moi directement.",
@@ -589,11 +586,11 @@
       board_eyebrow:"Tactics", board_title:"Whiteboard", board_lede:"Pick a field, sketch your setups.",
       sport_football:"Football", sport_basket:"Basketball", sport_gazon:"Field hockey", sport_glace:"Ice hockey", sport_rugby:"Rugby",
       tool_pen:"Chalk", tool_arrow:"Arrow", tool_token:"Player", tool_ball:"Ball", tool_eraser:"Eraser",
-      ai_title:"AI Assistant", ai_badge:"Pro",
+      replay_title:"Animated replay", ai_badge:"Pro",
+      replay_desc:"Replay your diagram stroke by stroke, in the order you drew it — perfect for explaining it to the team.",
+      replay_btn:"▶ Replay the board", replay_playing:"Playing...", replay_empty:"Draw a diagram on the board first.",
       ai_desc:"Describe what you need, the assistant suggests a drill for the selected sport.",
       ai_ph:"E.g. passing drill for beginners, 10 min", ai_btn:"Suggest a drill",
-      ai_wait:"Generating...", ai_empty:"Describe what you need above first.",
-      ai_error:"Connection error. Please try again.", ai_none:"No response, try again.",
       board_undo:"Undo", board_clear:"Clear all", board_save:"Save", board_load:"Load", board_export:"Export HD",
       plans_eyebrow:"Plan", plans_title:"Free or Pro",
       plans_lede:"The board and schedule stay free. Pro adds the AI assistant and export.",
@@ -632,11 +629,11 @@
       board_eyebrow:"Tactiek", board_title:"Whiteboard", board_lede:"Kies een veld, teken je opstellingen.",
       sport_football:"Voetbal", sport_basket:"Basketbal", sport_gazon:"Veldhockey", sport_glace:"IJshockey", sport_rugby:"Rugby",
       tool_pen:"Krijt", tool_arrow:"Pijl", tool_token:"Speler", tool_ball:"Bal", tool_eraser:"Gum",
-      ai_title:"AI-assistent", ai_badge:"Pro",
+      replay_title:"Herhaalde weergave", ai_badge:"Pro",
+      replay_desc:"Speel je schema stap voor stap opnieuw af, in de volgorde waarin je het tekende — ideaal om aan het team uit te leggen.",
+      replay_btn:"▶ Bord herhalen", replay_playing:"Bezig met afspelen...", replay_empty:"Teken eerst een schema op het bord.",
       ai_desc:"Beschrijf je behoefte, de assistent stelt een oefening voor bij de gekozen sport.",
       ai_ph:"Bv. pass-oefening voor beginners, 10 min", ai_btn:"Oefening voorstellen",
-      ai_wait:"Bezig met genereren...", ai_empty:"Beschrijf eerst je behoefte hierboven.",
-      ai_error:"Verbindingsfout. Probeer opnieuw.", ai_none:"Geen antwoord, probeer opnieuw.",
       board_undo:"Ongedaan maken", board_clear:"Alles wissen", board_save:"Opslaan", board_load:"Laden", board_export:"Exporteren HD",
       plans_eyebrow:"Abonnement", plans_title:"Gratis of Pro",
       plans_lede:"Bord en planning blijven gratis. Pro voegt de AI-assistent en export toe.",
@@ -675,11 +672,11 @@
       board_eyebrow:"Taktik", board_title:"Whiteboard", board_lede:"Wähle ein Spielfeld, zeichne deine Systeme.",
       sport_football:"Fußball", sport_basket:"Basketball", sport_gazon:"Feldhockey", sport_glace:"Eishockey", sport_rugby:"Rugby",
       tool_pen:"Kreide", tool_arrow:"Pfeil", tool_token:"Spieler", tool_ball:"Ball", tool_eraser:"Radiergummi",
-      ai_title:"KI-Assistent", ai_badge:"Pro",
+      replay_title:"Animierte Wiedergabe", ai_badge:"Pro",
+      replay_desc:"Spiele dein Schema Strich für Strich in der gezeichneten Reihenfolge ab — ideal, um es dem Team zu erklären.",
+      replay_btn:"▶ Board abspielen", replay_playing:"Wiedergabe läuft...", replay_empty:"Zeichne zuerst ein Schema auf das Board.",
       ai_desc:"Beschreibe deinen Bedarf, der Assistent schlägt eine Übung für die gewählte Sportart vor.",
       ai_ph:"Z. B. Passübung für Anfänger, 10 Min", ai_btn:"Übung vorschlagen",
-      ai_wait:"Wird generiert...", ai_empty:"Beschreibe zuerst deinen Bedarf oben.",
-      ai_error:"Verbindungsfehler. Bitte erneut versuchen.", ai_none:"Keine Antwort, bitte erneut versuchen.",
       board_undo:"Rückgängig", board_clear:"Alles löschen", board_save:"Speichern", board_load:"Laden", board_export:"HD exportieren",
       plans_eyebrow:"Abo", plans_title:"Gratis oder Pro",
       plans_lede:"Board und Planung bleiben gratis. Pro ergänzt den KI-Assistenten und den Export.",
@@ -1093,8 +1090,8 @@
     drawArrowHead(ctx, a.x,a.y,b.x,b.y,currentColor);
   }
 
-  function renderObjects(targetCtx){
-    objects.forEach(o=>{
+  function renderObjects(targetCtx, list){
+    (list || objects).forEach(o=>{
       if(o.type === 'stroke'){
         if(o.points.length < 2) return;
         targetCtx.beginPath();
@@ -1187,38 +1184,56 @@
   // init after fonts/layout settle
   requestAnimationFrame(()=> setTimeout(resizeCanvas, 50));
 
-  // ---------- AI ASSISTANT ----------
-  const aiBtn = document.getElementById('aiBtn');
-  const aiOutput = document.getElementById('aiOutput');
-  const aiPrompt = document.getElementById('aiPrompt');
-  aiBtn.addEventListener('click', async ()=>{
+  // ---------- REJEU ANIMÉ ----------
+  const replayBtn = document.getElementById('replayBtn');
+  const replayStatus = document.getElementById('replayStatus');
+  const sleep = (ms)=> new Promise(r=> setTimeout(r, ms));
+  let isReplaying = false;
+
+  replayBtn.addEventListener('click', async ()=>{
     if(!requireProOrPrompt()) return;
-    const need = aiPrompt.value.trim();
-    if(!need){ aiOutput.textContent = t('ai_empty'); return; }
-    aiOutput.textContent = t('ai_wait');
-    aiBtn.disabled = true;
-    try{
-      const sportName = t('sport_' + currentSport);
-      const langName = t('lang_name_for_ai');
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
-          system: `Tu es un entraîneur adjoint expert en ${sportName}. Propose UN exercice concret, concis, structuré ainsi: nom de l'exercice, durée, matériel, déroulé en 3-4 lignes max. Pas de blabla. Réponds entièrement en ${langName}.`,
-          messages: [{ role: "user", content: need }]
-        })
-      });
-      const data = await response.json();
-      const text = (data.content || []).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
-      aiOutput.textContent = text || t('ai_none');
-    }catch(e){
-      aiOutput.textContent = t('ai_error');
-      console.error(e);
-    }finally{
-      aiBtn.disabled = false;
+    if(isReplaying) return;
+    if(!objects.length){ replayStatus.textContent = t('replay_empty'); return; }
+    isReplaying = true;
+    replayBtn.disabled = true;
+    replayStatus.textContent = t('replay_playing');
+
+    const snapshot = objects.slice();
+    const drawn = [];
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+
+    for(const o of snapshot){
+      if(o.type === 'stroke'){
+        const partial = { type:'stroke', color:o.color, width:o.width, points:[] };
+        const step = Math.max(1, Math.floor(o.points.length / 40));
+        for(let i=0; i<o.points.length; i += step){
+          partial.points.push(o.points[i]);
+          ctx.clearRect(0,0,canvas.width, canvas.height);
+          renderObjects(ctx, drawn.concat([partial]));
+          await sleep(10);
+        }
+        drawn.push(o);
+      } else if(o.type === 'arrow'){
+        const steps = 14;
+        for(let s=1; s<=steps; s++){
+          const tt = s/steps;
+          const temp = { type:'arrow', color:o.color, x1:o.x1, y1:o.y1, x2:o.x1+(o.x2-o.x1)*tt, y2:o.y1+(o.y2-o.y1)*tt };
+          ctx.clearRect(0,0,canvas.width, canvas.height);
+          renderObjects(ctx, drawn.concat([temp]));
+          await sleep(16);
+        }
+        drawn.push(o);
+      } else {
+        drawn.push(o);
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+        renderObjects(ctx, drawn);
+        await sleep(220);
+      }
     }
+    redraw();
+    replayStatus.textContent = '';
+    replayBtn.disabled = false;
+    isReplaying = false;
   });
 
   // ---------- PRO BUTTON ----------
