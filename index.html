@@ -172,6 +172,12 @@
   .icon-btn{background:none; border:none; color:var(--chalk-dim); font-size:18px; line-height:1; padding:2px 6px;}
   .icon-btn:hover{color:var(--amber);}
   .empty-note{color:var(--chalk-dim); font-size:14px; font-style:italic;}
+  .seance-toolbar{display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;}
+  .seance-search{
+    flex:1; min-width:140px; background:var(--board); border:1px solid var(--line); color:var(--chalk);
+    padding:9px 12px; border-radius:2px; font-family:inherit; font-size:13px;
+  }
+  #reminderBtn.active{border-color:var(--amber); color:var(--amber);}
 
   .gen-panel{background:var(--board); border:1px solid var(--amber); border-radius:4px; padding:18px; margin-bottom:16px;}
   .gen-panel h3{margin:0 0 6px; font-size:16px; font-weight:600; display:flex; align-items:center; gap:8px;}
@@ -220,6 +226,16 @@
   .swatch.active{border-color:var(--chalk);}
 
   .board-wrap{position:relative; background:var(--board); border:1px solid var(--line); border-radius:4px; overflow:hidden; aspect-ratio:8/5;}
+  .board-wrap:fullscreen{
+    width:auto; height:100vh; max-width:100vw; margin:0 auto;
+    border:none; border-radius:0; background:var(--ink);
+  }
+  .fs-exit{
+    position:absolute; top:14px; right:14px; z-index:10; display:none;
+    width:36px; height:36px; border-radius:50%; border:none; background:rgba(20,23,26,.7);
+    color:var(--chalk); font-size:18px; align-items:center; justify-content:center;
+  }
+  .board-wrap:fullscreen .fs-exit{display:flex;}
   .board-wrap svg.field{position:absolute; inset:0; width:100%; height:100%; display:none;}
   .board-wrap svg.field.active{display:block;}
   .board-wrap canvas{position:absolute; inset:0; width:100%; height:100%; touch-action:none;}
@@ -379,6 +395,10 @@
           <div class="gen-output" id="genOutput"></div>
           <button class="btn btn-ghost" id="genAddBtn" style="display:none; justify-content:center;" data-i18n="gen_add">Ajouter au planning</button>
         </div>
+        <div class="seance-toolbar">
+          <input type="text" id="seanceSearch" class="seance-search" data-i18n-ph="seances_search_ph" placeholder="Rechercher...">
+          <button class="btn btn-ghost" id="reminderBtn" data-i18n="reminder_off">Activer les rappels</button>
+        </div>
         <div class="seance-list" id="seanceList">
           <p class="empty-note" data-i18n="seances_empty">Aucune séance pour l'instant.</p>
         </div>
@@ -429,6 +449,7 @@
       </div>
 
       <div class="board-wrap" id="boardWrap">
+        <button class="fs-exit" id="fsExitBtn" aria-label="Quitter le plein écran">×</button>
         <!-- FOOTBALL -->
         <svg class="field active" data-field="football" viewBox="0 0 800 500">
           <rect width="800" height="500" fill="#2E7D4F"/>
@@ -513,6 +534,7 @@
       <button class="btn btn-ghost" id="saveBtn" data-i18n="board_save">Enregistrer</button>
       <button class="btn btn-ghost" id="loadBtn" data-i18n="board_load">Charger</button>
       <button class="btn btn-primary" id="exportBtn" data-i18n="board_export">Exporter HD</button>
+      <button class="btn btn-ghost" id="fsBtn" data-i18n="board_fullscreen">⛶ Plein écran</button>
     </div>
   </section>
 
@@ -589,6 +611,11 @@
       gen_btn:"Générer la séance", gen_add:"Ajouter au planning", gen_total:"Durée totale :", gen_min:"min",
       gen_phase_warmup:"Échauffement", gen_phase_main:"Corps de séance", gen_phase_game:"Mise en application", gen_phase_debrief:"Retour au calme",
       gen_debrief_name:"Étirements et debrief", gen_debrief_desc:"Étirements légers en cercle, ressentis de chacune, ce qu'on retravaillera la semaine prochaine.",
+      board_fullscreen:"⛶ Plein écran",
+      seances_search_ph:"Rechercher (thème, notes...)", seances_no_results:"Aucune séance ne correspond à ta recherche.",
+      reminder_off:"Activer les rappels", reminder_on:"✓ Rappels activés",
+      reminder_unsupported:"Les notifications ne sont pas prises en charge sur cet appareil.",
+      reminder_denied:"Notifications refusées — active-les dans les réglages de ton navigateur pour recevoir des rappels.",
       gen_theme_label:"Séance générée —",
       gen_cat_echauffement:"Échauffement", gen_cat_technique:"Technique", gen_cat_jeu:"Mise en situation",
       board_eyebrow:"Tactique", board_title:"Tableau blanc", board_lede:"Choisissez un terrain, dessinez vos schémas.",
@@ -637,6 +664,11 @@
       gen_btn:"Generate session", gen_add:"Add to planning", gen_total:"Total duration:", gen_min:"min",
       gen_phase_warmup:"Warm-up", gen_phase_main:"Main session", gen_phase_game:"Application", gen_phase_debrief:"Cool-down",
       gen_debrief_name:"Stretching & debrief", gen_debrief_desc:"Light stretching in a circle, quick check-in, what's next week's focus.",
+      board_fullscreen:"⛶ Fullscreen",
+      seances_search_ph:"Search (theme, notes...)", seances_no_results:"No session matches your search.",
+      reminder_off:"Enable reminders", reminder_on:"✓ Reminders on",
+      reminder_unsupported:"Notifications aren't supported on this device.",
+      reminder_denied:"Notifications blocked — enable them in your browser settings to get reminders.",
       gen_theme_label:"Generated session —",
       gen_cat_echauffement:"Warm-up", gen_cat_technique:"Technique", gen_cat_jeu:"Game situation",
       board_eyebrow:"Tactics", board_title:"Whiteboard", board_lede:"Pick a field, sketch your setups.",
@@ -687,6 +719,11 @@
       gen_btn:"Training genereren", gen_add:"Toevoegen aan planning", gen_total:"Totale duur:", gen_min:"min",
       gen_phase_warmup:"Warming-up", gen_phase_main:"Kern van de training", gen_phase_game:"Toepassing", gen_phase_debrief:"Afsluiting",
       gen_debrief_name:"Stretchen & terugblik", gen_debrief_desc:"Lichte stretch in kring, korte terugblik, focus voor volgende week.",
+      board_fullscreen:"⛶ Volledig scherm",
+      seances_search_ph:"Zoeken (thema, notities...)", seances_no_results:"Geen training komt overeen met je zoekopdracht.",
+      reminder_off:"Herinneringen inschakelen", reminder_on:"✓ Herinneringen aan",
+      reminder_unsupported:"Meldingen worden niet ondersteund op dit toestel.",
+      reminder_denied:"Meldingen geweigerd — schakel ze in via je browserinstellingen om herinneringen te ontvangen.",
       gen_theme_label:"Gegenereerde training —",
       gen_cat_echauffement:"Warming-up", gen_cat_technique:"Techniek", gen_cat_jeu:"Wedstrijdvorm",
       board_eyebrow:"Tactiek", board_title:"Whiteboard", board_lede:"Kies een veld, teken je opstellingen.",
@@ -737,6 +774,11 @@
       gen_btn:"Einheit generieren", gen_add:"Zum Plan hinzufügen", gen_total:"Gesamtdauer:", gen_min:"Min.",
       gen_phase_warmup:"Aufwärmen", gen_phase_main:"Hauptteil", gen_phase_game:"Anwendung", gen_phase_debrief:"Abschluss",
       gen_debrief_name:"Dehnen & Feedback", gen_debrief_desc:"Leichtes Dehnen im Kreis, kurzes Feedback, Fokus für nächste Woche.",
+      board_fullscreen:"⛶ Vollbild",
+      seances_search_ph:"Suchen (Thema, Notizen...)", seances_no_results:"Keine Einheit entspricht deiner Suche.",
+      reminder_off:"Erinnerungen aktivieren", reminder_on:"✓ Erinnerungen an",
+      reminder_unsupported:"Benachrichtigungen werden auf diesem Gerät nicht unterstützt.",
+      reminder_denied:"Benachrichtigungen blockiert — aktiviere sie in deinen Browsereinstellungen, um Erinnerungen zu erhalten.",
       gen_theme_label:"Generierte Einheit —",
       gen_cat_echauffement:"Aufwärmen", gen_cat_technique:"Technik", gen_cat_jeu:"Spielform",
       board_eyebrow:"Taktik", board_title:"Whiteboard", board_lede:"Wähle ein Spielfeld, zeichne deine Systeme.",
@@ -911,6 +953,8 @@
   // ---------- SEANCES ----------
   const seanceForm = document.getElementById('seanceForm');
   const seanceList = document.getElementById('seanceList');
+  const seanceSearch = document.getElementById('seanceSearch');
+  seanceSearch.addEventListener('input', ()=> renderSeances());
   let seances = [];
 
   async function loadSeances(){
@@ -933,11 +977,18 @@
     catch(e){ console.error('Erreur de sauvegarde des séances', e); }
   }
   function renderSeances(){
-    if(!seances.length){
-      seanceList.innerHTML = `<p class="empty-note">${t('seances_empty')}</p>`;
+    const q = (seanceSearch.value || '').trim().toLowerCase();
+    const list = q ? seances.filter(s =>
+      (s.theme||'').toLowerCase().includes(q) ||
+      (s.notes||'').toLowerCase().includes(q) ||
+      (s.date||'').toLowerCase().includes(q)
+    ) : seances;
+
+    if(!list.length){
+      seanceList.innerHTML = `<p class="empty-note">${q ? t('seances_no_results') : t('seances_empty')}</p>`;
       return;
     }
-    seanceList.innerHTML = seances.map((s)=>`
+    seanceList.innerHTML = list.map((s)=>`
       <div class="seance-card">
         <div>
           <div class="meta">${escapeHtml(s.date)}</div>
@@ -986,6 +1037,79 @@
     renderSeances();
   });
   loadSeances();
+
+  // ---------- RAPPELS ----------
+  const WEEKDAYS = {
+    fr: ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'],
+    en: ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'],
+    nl: ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'],
+    de: ['sonntag','montag','dienstag','mittwoch','donnerstag','freitag','samstag']
+  };
+  function detectWeekdayIndex(text){
+    const low = (text || '').toLowerCase();
+    for(const lang in WEEKDAYS){
+      for(let i = 0; i < 7; i++){
+        if(low.includes(WEEKDAYS[lang][i])) return i;
+      }
+    }
+    return null;
+  }
+
+  const reminderBtn = document.getElementById('reminderBtn');
+  let remindersEnabled = false;
+
+  function updateReminderBtn(){
+    reminderBtn.textContent = t(remindersEnabled ? 'reminder_on' : 'reminder_off');
+    reminderBtn.classList.toggle('active', remindersEnabled);
+  }
+
+  async function checkReminders(){
+    if(!remindersEnabled || !('Notification' in window) || Notification.permission !== 'granted') return;
+    const now = new Date();
+    if(now.getHours() < 17) return;
+    const tomorrow = (now.getDay() + 1) % 7;
+    const todayKey = now.toISOString().slice(0,10);
+    for(const s of seances){
+      const idx = detectWeekdayIndex(s.date);
+      if(idx === null || idx !== tomorrow) continue;
+      const flagKey = 'notified_' + s.id + '_' + todayKey;
+      try{
+        await window.storage.get(flagKey, false);
+        continue; // déjà notifié aujourd'hui
+      }catch(e){ /* pas encore notifié, on continue */ }
+      try{
+        new Notification('CRAIE', { body: s.theme, icon: '/icon-192.png' });
+        await window.storage.set(flagKey, 'true', false);
+      }catch(err){ console.error('Erreur de notification', err); }
+    }
+  }
+
+  reminderBtn.addEventListener('click', async ()=>{
+    if(!('Notification' in window)){ alert(t('reminder_unsupported')); return; }
+    if(!remindersEnabled){
+      const perm = await Notification.requestPermission();
+      if(perm !== 'granted'){ alert(t('reminder_denied')); return; }
+      remindersEnabled = true;
+      try{ await window.storage.set('reminders_enabled', 'true', false); }catch(e){}
+      checkReminders();
+    }else{
+      remindersEnabled = false;
+      try{ await window.storage.set('reminders_enabled', 'false', false); }catch(e){}
+    }
+    updateReminderBtn();
+  });
+
+  (async ()=>{
+    try{
+      const r = await window.storage.get('reminders_enabled', false);
+      remindersEnabled = !!(r && r.value === 'true' && 'Notification' in window && Notification.permission === 'granted');
+    }catch(e){ remindersEnabled = false; }
+    updateReminderBtn();
+    checkReminders();
+  })();
+
+  setInterval(checkReminders, 30 * 60 * 1000);
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') checkReminders(); });
 
   // ---------- GÉNÉRATEUR DE SÉANCE ----------
   const EXERCISES = {
@@ -1239,6 +1363,19 @@
     redraw();
   }
   window.addEventListener('resize', resizeCanvas);
+
+  const fsBtn = document.getElementById('fsBtn');
+  const fsExitBtn = document.getElementById('fsExitBtn');
+  fsBtn.addEventListener('click', ()=>{
+    if(!document.fullscreenElement){
+      const req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+      if(req) req.call(wrap);
+    }else{
+      document.exitFullscreen();
+    }
+  });
+  fsExitBtn.addEventListener('click', ()=>{ if(document.fullscreenElement) document.exitFullscreen(); });
+  document.addEventListener('fullscreenchange', ()=> setTimeout(resizeCanvas, 50));
 
   const thicknessWrap = document.getElementById('thicknessWrap');
   const thicknessSlider = document.getElementById('thicknessSlider');
