@@ -168,10 +168,29 @@
   }
   .seance-card .meta{font-size:12px; color:var(--amber); text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px;}
   .seance-card .theme{font-size:16px; font-weight:600; margin-bottom:4px;}
-  .seance-card .notes{font-size:13px; color:var(--chalk-dim); line-height:1.5;}
+  .seance-card .notes{font-size:13px; color:var(--chalk-dim); line-height:1.5; white-space:pre-line;}
   .icon-btn{background:none; border:none; color:var(--chalk-dim); font-size:18px; line-height:1; padding:2px 6px;}
   .icon-btn:hover{color:var(--amber);}
   .empty-note{color:var(--chalk-dim); font-size:14px; font-style:italic;}
+
+  .gen-panel{background:var(--board); border:1px solid var(--amber); border-radius:4px; padding:18px; margin-bottom:16px;}
+  .gen-panel h3{margin:0 0 6px; font-size:16px; font-weight:600; display:flex; align-items:center; gap:8px;}
+  .gen-panel .badge{display:inline-block; background:var(--amber); color:var(--ink); font-size:10px; font-weight:700; letter-spacing:.06em; padding:2px 8px; border-radius:10px; text-transform:uppercase;}
+  .gen-desc{font-size:13px; color:var(--chalk-dim); margin:0 0 14px; line-height:1.5;}
+  .gen-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;}
+  .gen-row select, .gen-row input{
+    background:var(--ink); border:1px solid var(--line); color:var(--chalk);
+    padding:9px 10px; border-radius:2px; font-family:inherit; font-size:13px; flex:1; min-width:120px;
+  }
+  .gen-output{margin-top:14px; display:flex; flex-direction:column; gap:8px;}
+  .gen-block{
+    background:var(--board-light); border:1px solid var(--line); border-radius:4px;
+    padding:12px 14px; display:flex; gap:12px; align-items:baseline;
+  }
+  .gen-block .gen-block-time{color:var(--amber); font-size:12px; font-weight:700; white-space:nowrap; min-width:52px;}
+  .gen-block .gen-block-title{font-size:14px; font-weight:600; margin-bottom:2px;}
+  .gen-block .gen-block-desc{font-size:12px; color:var(--chalk-dim); line-height:1.5;}
+  .gen-total{font-size:12px; color:var(--chalk-dim); margin-top:2px;}
 
   /* TABLEAU */
   .sport-pills{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;}
@@ -337,6 +356,29 @@
         <button type="submit" class="btn btn-primary" style="margin-top:6px;" data-i18n="seances_add">Ajouter la séance</button>
       </form>
       <div>
+        <div class="gen-panel" id="genPanel">
+          <h3><span data-i18n="gen_title">Générateur de séance</span></h3>
+          <p class="gen-desc" data-i18n="gen_desc">Choisis un sport, un thème et une durée — une séance complète et cohérente est assemblée automatiquement.</p>
+          <div class="gen-row">
+            <select id="genSport">
+              <option value="football" data-i18n="sport_football">Football</option>
+              <option value="basket" data-i18n="sport_basket">Basketball</option>
+              <option value="gazon" data-i18n="sport_gazon">Hockey sur gazon</option>
+              <option value="glace" data-i18n="sport_glace">Hockey sur glace</option>
+              <option value="rugby" data-i18n="sport_rugby">Rugby</option>
+            </select>
+            <select id="genTheme">
+              <option value="mixte" data-i18n="gen_theme_mixte">Mixte</option>
+              <option value="passes" data-i18n="gen_theme_passes">Passes &amp; contrôle</option>
+              <option value="tir" data-i18n="gen_theme_tir">Tir &amp; finition</option>
+              <option value="defense" data-i18n="gen_theme_defense">Défense</option>
+            </select>
+            <input type="number" id="genDuration" min="30" max="150" step="5" value="90">
+          </div>
+          <button class="btn btn-primary" id="genBtn" style="justify-content:center;" data-i18n="gen_btn">Générer la séance</button>
+          <div class="gen-output" id="genOutput"></div>
+          <button class="btn btn-ghost" id="genAddBtn" style="display:none; justify-content:center;" data-i18n="gen_add">Ajouter au planning</button>
+        </div>
         <div class="seance-list" id="seanceList">
           <p class="empty-note" data-i18n="seances_empty">Aucune séance pour l'instant.</p>
         </div>
@@ -542,6 +584,13 @@
       seances_label_theme:"Thème", seances_ph_theme:"Ex. Passes et contrôle",
       seances_label_notes:"Notes", seances_ph_notes:"Détails, matériel, objectifs...",
       seances_add:"Ajouter la séance", seances_empty:"Aucune séance pour l'instant.",
+      gen_title:"Générateur de séance", gen_desc:"Choisis un sport, un thème et une durée — une séance complète et cohérente est assemblée automatiquement.",
+      gen_theme_mixte:"Mixte", gen_theme_passes:"Passes & contrôle", gen_theme_tir:"Tir & finition", gen_theme_defense:"Défense",
+      gen_btn:"Générer la séance", gen_add:"Ajouter au planning", gen_total:"Durée totale :", gen_min:"min",
+      gen_phase_warmup:"Échauffement", gen_phase_main:"Corps de séance", gen_phase_game:"Mise en application", gen_phase_debrief:"Retour au calme",
+      gen_debrief_name:"Étirements et debrief", gen_debrief_desc:"Étirements légers en cercle, ressentis de chacune, ce qu'on retravaillera la semaine prochaine.",
+      gen_theme_label:"Séance générée —",
+      gen_cat_echauffement:"Échauffement", gen_cat_technique:"Technique", gen_cat_jeu:"Mise en situation",
       board_eyebrow:"Tactique", board_title:"Tableau blanc", board_lede:"Choisissez un terrain, dessinez vos schémas.",
       sport_football:"Football", sport_basket:"Basketball", sport_gazon:"Hockey sur gazon", sport_glace:"Hockey sur glace", sport_rugby:"Rugby",
       tool_pen:"Craie", tool_arrow:"Flèche", tool_token:"Joueur", tool_ball:"Ballon", tool_eraser:"Gomme",
@@ -583,6 +632,13 @@
       seances_label_theme:"Theme", seances_ph_theme:"E.g. Passing and control",
       seances_label_notes:"Notes", seances_ph_notes:"Details, equipment, goals...",
       seances_add:"Add session", seances_empty:"No sessions yet.",
+      gen_title:"Session generator", gen_desc:"Pick a sport, a theme and a duration — a complete, coherent session gets assembled automatically.",
+      gen_theme_mixte:"Mixed", gen_theme_passes:"Passing & control", gen_theme_tir:"Shooting & finishing", gen_theme_defense:"Defense",
+      gen_btn:"Generate session", gen_add:"Add to planning", gen_total:"Total duration:", gen_min:"min",
+      gen_phase_warmup:"Warm-up", gen_phase_main:"Main session", gen_phase_game:"Application", gen_phase_debrief:"Cool-down",
+      gen_debrief_name:"Stretching & debrief", gen_debrief_desc:"Light stretching in a circle, quick check-in, what's next week's focus.",
+      gen_theme_label:"Generated session —",
+      gen_cat_echauffement:"Warm-up", gen_cat_technique:"Technique", gen_cat_jeu:"Game situation",
       board_eyebrow:"Tactics", board_title:"Whiteboard", board_lede:"Pick a field, sketch your setups.",
       sport_football:"Football", sport_basket:"Basketball", sport_gazon:"Field hockey", sport_glace:"Ice hockey", sport_rugby:"Rugby",
       tool_pen:"Chalk", tool_arrow:"Arrow", tool_token:"Player", tool_ball:"Ball", tool_eraser:"Eraser",
@@ -626,6 +682,13 @@
       seances_label_theme:"Thema", seances_ph_theme:"Bv. Passen en balcontrole",
       seances_label_notes:"Notities", seances_ph_notes:"Details, materiaal, doelen...",
       seances_add:"Training toevoegen", seances_empty:"Nog geen trainingen.",
+      gen_title:"Trainingsgenerator", gen_desc:"Kies een sport, een thema en een duur — een volledige, samenhangende training wordt automatisch samengesteld.",
+      gen_theme_mixte:"Gemengd", gen_theme_passes:"Passen & controle", gen_theme_tir:"Schieten & afwerking", gen_theme_defense:"Verdediging",
+      gen_btn:"Training genereren", gen_add:"Toevoegen aan planning", gen_total:"Totale duur:", gen_min:"min",
+      gen_phase_warmup:"Warming-up", gen_phase_main:"Kern van de training", gen_phase_game:"Toepassing", gen_phase_debrief:"Afsluiting",
+      gen_debrief_name:"Stretchen & terugblik", gen_debrief_desc:"Lichte stretch in kring, korte terugblik, focus voor volgende week.",
+      gen_theme_label:"Gegenereerde training —",
+      gen_cat_echauffement:"Warming-up", gen_cat_technique:"Techniek", gen_cat_jeu:"Wedstrijdvorm",
       board_eyebrow:"Tactiek", board_title:"Whiteboard", board_lede:"Kies een veld, teken je opstellingen.",
       sport_football:"Voetbal", sport_basket:"Basketbal", sport_gazon:"Veldhockey", sport_glace:"IJshockey", sport_rugby:"Rugby",
       tool_pen:"Krijt", tool_arrow:"Pijl", tool_token:"Speler", tool_ball:"Bal", tool_eraser:"Gum",
@@ -669,6 +732,13 @@
       seances_label_theme:"Thema", seances_ph_theme:"Z. B. Pass- und Balltechnik",
       seances_label_notes:"Notizen", seances_ph_notes:"Details, Material, Ziele...",
       seances_add:"Einheit hinzufügen", seances_empty:"Noch keine Einheiten.",
+      gen_title:"Einheiten-Generator", gen_desc:"Wähle Sportart, Thema und Dauer — eine vollständige, stimmige Einheit wird automatisch zusammengestellt.",
+      gen_theme_mixte:"Gemischt", gen_theme_passes:"Passen & Ballkontrolle", gen_theme_tir:"Torschuss & Abschluss", gen_theme_defense:"Verteidigung",
+      gen_btn:"Einheit generieren", gen_add:"Zum Plan hinzufügen", gen_total:"Gesamtdauer:", gen_min:"Min.",
+      gen_phase_warmup:"Aufwärmen", gen_phase_main:"Hauptteil", gen_phase_game:"Anwendung", gen_phase_debrief:"Abschluss",
+      gen_debrief_name:"Dehnen & Feedback", gen_debrief_desc:"Leichtes Dehnen im Kreis, kurzes Feedback, Fokus für nächste Woche.",
+      gen_theme_label:"Generierte Einheit —",
+      gen_cat_echauffement:"Aufwärmen", gen_cat_technique:"Technik", gen_cat_jeu:"Spielform",
       board_eyebrow:"Taktik", board_title:"Whiteboard", board_lede:"Wähle ein Spielfeld, zeichne deine Systeme.",
       sport_football:"Fußball", sport_basket:"Basketball", sport_gazon:"Feldhockey", sport_glace:"Eishockey", sport_rugby:"Rugby",
       tool_pen:"Kreide", tool_arrow:"Pfeil", tool_token:"Spieler", tool_ball:"Ball", tool_eraser:"Radiergummi",
@@ -916,6 +986,217 @@
     renderSeances();
   });
   loadSeances();
+
+  // ---------- GÉNÉRATEUR DE SÉANCE ----------
+  const EXERCISES = {
+    football: {
+      warmup: [
+        {name:"Activation articulaire + jonglages libres", desc:"Mobilité chevilles/hanches puis jonglages en trio pour réveiller le pied."},
+        {name:"Conduite de balle en slalom", desc:"Slalom entre plots, revers/coup du pied alternés, rythme progressif."}
+      ],
+      themes: {
+        passes: [
+          {name:"Passes en triangle", desc:"Passe-et-suis à 3, précision et qualité de contrôle orienté."},
+          {name:"Rondo 4v1", desc:"Conservation en espace réduit, 2 touches maximum."}
+        ],
+        tir: [
+          {name:"Finition en 1v1 face au but", desc:"Duel attaquante/gardienne après une passe en profondeur."},
+          {name:"Tirs enchaînés après centre", desc:"Centre depuis l'aile, reprise de volée ou du plat du pied."}
+        ],
+        defense: [
+          {name:"Défense en ligne, jeu de la passe", desc:"Bloc défensif qui coulisse selon la position du ballon."},
+          {name:"1v1 défensif orienté", desc:"L'attaquante part de face, la défenseure doit orienter vers l'extérieur."}
+        ]
+      },
+      game: [
+        {name:"Match à thème 5v5", desc:"Petit terrain, consigne imposée (2 touches, ou obligation de centre)."},
+        {name:"Possession + transition rapide", desc:"Jeu à thème avec contre immédiat dès récupération du ballon."}
+      ]
+    },
+    basket: {
+      warmup: [
+        {name:"Dribbles au signal", desc:"Dribble libre, changement de main/direction au coup de sifflet."},
+        {name:"Passes en mouvement, 2 lignes", desc:"Passe-et-va sur toute la longueur du terrain."}
+      ],
+      themes: {
+        passes: [
+          {name:"Passes sous pression en losange", desc:"4 joueuses, une défenseuse au centre gêne la circulation."},
+          {name:"Give-and-go", desc:"Passe puis course pour recevoir le retour, enchaîner vers le panier."}
+        ],
+        tir: [
+          {name:"Tirs en course après dribble", desc:"Lay-up des deux côtés, alterner main gauche/droite."},
+          {name:"Séries de tirs à mi-distance", desc:"5 positions autour de la clé, rotation rapide."}
+        ],
+        defense: [
+          {name:"Défense individuelle glissée", desc:"Position basse, déplacements latéraux face à l'attaquante."},
+          {name:"Aide défensive à deux", desc:"Travail de la rotation et de la communication en défense."}
+        ]
+      },
+      game: [
+        {name:"Match 3v3 demi-terrain", desc:"Petit format, forte intensité, rotation rapide des équipes."},
+        {name:"5v5 avec contrainte", desc:"Obligation de faire 3 passes avant de tirer."}
+      ]
+    },
+    gazon: {
+      warmup: [
+        {name:"Conduite libre + arrêt-contrôle", desc:"Balle collée à la crosse, arrêt net au coup de sifflet."},
+        {name:"Slalom technique", desc:"Revers/coup droit alternés entre les plots."}
+      ],
+      themes: {
+        passes: [
+          {name:"Passes en triangle", desc:"Passe-et-suis, insister sur l'amorti à la réception."},
+          {name:"Passes en mouvement, 2 lignes", desc:"Conduite puis transmission à une partenaire qui vient en face."}
+        ],
+        tir: [
+          {name:"Tirs après entrée dans le cercle", desc:"Prise de balle en course puis frappe ou push rapide."},
+          {name:"Duel 1v1 face à la gardienne", desc:"Percée individuelle puis finition sous pression."}
+        ],
+        defense: [
+          {name:"Tacle et repli défensif", desc:"Interception propre puis relance immédiate."},
+          {name:"Défense de zone à 3", desc:"Coulissement selon la position de la balle adverse."}
+        ]
+      },
+      game: [
+        {name:"Match à thème 4v4", desc:"Petit terrain, obligation de 2 touches avant de transmettre."},
+        {name:"Possession + contre rapide", desc:"Transition immédiate dès la récupération du ballon."}
+      ]
+    },
+    glace: {
+      warmup: [
+        {name:"Patinage libre + virages", desc:"Accélérations, freinages, virages serrés pour l'échauffement."},
+        {name:"Maniement de palet en mouvement", desc:"Conduite du palet à vitesse croissante sur toute la patinoire."}
+      ],
+      themes: {
+        passes: [
+          {name:"Passes en mouvement, 2 lignes", desc:"Réception en patinant, transmission propre sans ralentir."},
+          {name:"Triangle de passes", desc:"Passe-et-suis à trois, rythme soutenu."}
+        ],
+        tir: [
+          {name:"Tirs en échappée", desc:"Départ seule face à la gardienne, variation du tir (poignet/slap)."},
+          {name:"One-timer après passe latérale", desc:"Tir direct sans contrôle après une passe transversale."}
+        ],
+        defense: [
+          {name:"Repli défensif 2v1", desc:"Gestion du surnombre offensif, choix de couverture."},
+          {name:"Séparation du porteur le long de la bande", desc:"Mise en échec contrôlée, en sécurité."}
+        ]
+      },
+      game: [
+        {name:"Match à thème 3v3", desc:"Petite surface, forte intensité, transitions rapides."},
+        {name:"Supériorité / infériorité numérique", desc:"Travail à 5 contre 4 puis inversion des rôles."}
+      ]
+    },
+    rugby: {
+      warmup: [
+        {name:"Course + passes à la main en mouvement", desc:"Ligne de passes en trottinant, précision avant vitesse."},
+        {name:"Activation contact léger", desc:"Chutes contrôlées, plaquages à faible intensité pour préparer le corps."}
+      ],
+      themes: {
+        passes: [
+          {name:"Passes en ligne à 4", desc:"Enchaînement de passes vers l'extérieur en courant."},
+          {name:"Passes après contact simulé", desc:"Transmettre juste avant/après un contact léger, garder la vitesse."}
+        ],
+        tir: [
+          {name:"Percée et aplati en course", desc:"Course de vitesse suivie d'un aplati précis dans l'en-but."},
+          {name:"2v1 en extérieur", desc:"Prise de décision passe/percée face à une défenseure isolée."}
+        ],
+        defense: [
+          {name:"Plaquage technique en binôme", desc:"Approche basse, sécurité de la tête, alternance des rôles."},
+          {name:"Ligne défensive qui coulisse", desc:"Déplacement latéral coordonné selon la position du ballon."}
+        ]
+      },
+      game: [
+        {name:"Touch rugby à thème", desc:"Sans contact, obligation de jeu au large."},
+        {name:"Match réduit avec plaquages", desc:"Petit effectif, intensité contrôlée, application des consignes du jour."}
+      ]
+    }
+  };
+
+  function pickRandom(arr, n){
+    const copy = arr.slice();
+    for(let i = copy.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy.slice(0, n);
+  }
+
+  function generateSession(sport, theme, totalMinutes){
+    const pool = EXERCISES[sport];
+    let mainPool;
+    if(theme === 'mixte'){
+      mainPool = [...pool.themes.passes, ...pool.themes.tir, ...pool.themes.defense];
+    }else{
+      mainPool = pool.themes[theme] || pool.themes.passes;
+    }
+
+    let warmupMin = Math.round((totalMinutes * 0.15) / 5) * 5;
+    warmupMin = Math.min(20, Math.max(10, warmupMin));
+    let gameMin = Math.round((totalMinutes * 0.20) / 5) * 5;
+    gameMin = Math.min(25, Math.max(15, gameMin));
+    const debriefMin = 5;
+    let mainMin = totalMinutes - warmupMin - gameMin - debriefMin;
+    if(mainMin < 10) mainMin = 10;
+
+    const mainCount = Math.min(2, mainPool.length);
+    const mainPicks = pickRandom(mainPool, mainCount);
+    const perMain = Math.round(mainMin / mainCount);
+
+    const warmupPick = pickRandom(pool.warmup, 1)[0];
+    const gamePick = pickRandom(pool.game, 1)[0];
+
+    const blocks = [
+      { phase: t('gen_phase_warmup'), time: warmupMin, name: warmupPick.name, desc: warmupPick.desc },
+      ...mainPicks.map(ex => ({ phase: t('gen_phase_main'), time: perMain, name: ex.name, desc: ex.desc })),
+      { phase: t('gen_phase_game'), time: gameMin, name: gamePick.name, desc: gamePick.desc },
+      { phase: t('gen_phase_debrief'), time: debriefMin, name: t('gen_debrief_name'), desc: t('gen_debrief_desc') }
+    ];
+    const total = warmupMin + (perMain * mainCount) + gameMin + debriefMin;
+    return { blocks, total };
+  }
+
+  const genBtn = document.getElementById('genBtn');
+  const genOutput = document.getElementById('genOutput');
+  const genAddBtn = document.getElementById('genAddBtn');
+  let lastGenSession = null;
+
+  genBtn.addEventListener('click', ()=>{
+    const sport = document.getElementById('genSport').value;
+    const theme = document.getElementById('genTheme').value;
+    const duration = parseInt(document.getElementById('genDuration').value, 10) || 90;
+    lastGenSession = generateSession(sport, theme, duration);
+    genOutput.innerHTML = lastGenSession.blocks.map(b => `
+      <div class="gen-block">
+        <div class="gen-block-time">${b.time} ${t('gen_min')}</div>
+        <div>
+          <div class="gen-block-title"><span style="color:var(--amber); font-size:11px; text-transform:uppercase; letter-spacing:.05em;">${escapeHtml(b.phase)}</span><br>${escapeHtml(b.name)}</div>
+          <div class="gen-block-desc">${escapeHtml(b.desc)}</div>
+        </div>
+      </div>
+    `).join('') + `<div class="gen-total">${t('gen_total')} ${lastGenSession.total} ${t('gen_min')}</div>`;
+    genAddBtn.style.display = 'flex';
+  });
+
+  genAddBtn.addEventListener('click', async ()=>{
+    if(!lastGenSession) return;
+    const sportLabel = t('sport_' + document.getElementById('genSport').value);
+    const themeVal = document.getElementById('genTheme').value;
+    const themeLabel = t('gen_theme_' + themeVal);
+    const notes = lastGenSession.blocks.map(b => `${b.phase} (${b.time} ${t('gen_min')}) — ${b.name} : ${b.desc}`).join('\n');
+    const entry = { date: new Date().toLocaleDateString(), theme: `${sportLabel} — ${themeLabel}`, notes };
+    if(currentUser){
+      try{
+        const { data, error } = await sb.from('seances').insert({ ...entry, user_id: currentUser.id }).select().single();
+        if(error) throw error;
+        seances.unshift(data);
+      }catch(e){ console.error('Erreur d\'ajout de séance générée', e); }
+    }else{
+      seances.unshift({ id: crypto.randomUUID(), ...entry });
+      saveSeancesLocal();
+    }
+    renderSeances();
+    genAddBtn.textContent = '✓';
+    setTimeout(()=>{ genAddBtn.textContent = t('gen_add'); }, 1500);
+  });
 
   // ---------- SCROLL REVEAL ----------
   const revealObserver = new IntersectionObserver((entries)=>{
