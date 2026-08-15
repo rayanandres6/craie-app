@@ -28,6 +28,15 @@
     --rugby:#B15134;
     --header-h:64px;
   }
+  html[data-theme="light"]{
+    --ink:#F7F4EC;
+    --board:#FFFFFF;
+    --board-light:#EFEAD9;
+    --chalk:#20261F;
+    --chalk-dim:#5C6B60;
+    --line:#DAD4C2;
+    --amber-dim:rgba(231,169,76,.20);
+  }
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;padding:0;}
   body{
@@ -70,7 +79,19 @@
     border-radius:2px; font-size:12px; letter-spacing:.03em; padding:6px 12px;
   }
   #accountBtn:hover{color:var(--chalk); border-color:var(--chalk-dim);}
+  #themeBtn{
+    background:transparent; color:var(--chalk-dim); border:1px solid var(--line);
+    border-radius:2px; font-size:14px; padding:6px 10px; line-height:1;
+  }
+  #themeBtn:hover{color:var(--chalk); border-color:var(--chalk-dim);}
   .sync-dot{display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--amber); margin-right:6px; vertical-align:middle;}
+
+  .offline-banner{
+    position:fixed; top:var(--header-h); left:0; right:0; z-index:60;
+    background:var(--amber); color:var(--ink); text-align:center;
+    font-size:12px; font-weight:600; padding:6px 12px; display:none;
+  }
+  .offline-banner.show{display:block;}
 
   .modal-overlay{
     position:fixed; inset:0; background:rgba(20,23,26,.75); backdrop-filter:blur(4px);
@@ -225,15 +246,15 @@
   .swatch{width:20px; height:20px; border-radius:50%; border:2px solid transparent;}
   .swatch.active{border-color:var(--chalk);}
 
-  .board-wrap{position:relative; background:var(--board); border:1px solid var(--line); border-radius:4px; overflow:hidden; aspect-ratio:8/5;}
+  .board-wrap{position:relative; background:#212E27; border:1px solid var(--line); border-radius:4px; overflow:hidden; aspect-ratio:8/5;}
   .board-wrap:fullscreen{
     width:auto; height:100vh; max-width:100vw; margin:0 auto;
-    border:none; border-radius:0; background:var(--ink);
+    border:none; border-radius:0; background:#14171A;
   }
   .fs-exit{
     position:absolute; top:14px; right:14px; z-index:10; display:none;
     width:36px; height:36px; border-radius:50%; border:none; background:rgba(20,23,26,.7);
-    color:var(--chalk); font-size:18px; align-items:center; justify-content:center;
+    color:#F5F1E6; font-size:18px; align-items:center; justify-content:center;
   }
   .board-wrap:fullscreen .fs-exit{display:flex;}
   .board-wrap svg.field{position:absolute; inset:0; width:100%; height:100%; display:none;}
@@ -304,9 +325,12 @@
       <option value="nl">NL</option>
       <option value="de">DE</option>
     </select>
+    <button id="themeBtn" aria-label="Thème">☀︎</button>
     <button id="accountBtn" data-i18n="account_login">Se connecter</button>
   </div>
 </header>
+
+<div class="offline-banner" id="offlineBanner" data-i18n="offline_banner">Hors ligne — les modifications seront synchronisées à la reconnexion.</div>
 
 <div class="modal-overlay" id="authModal">
   <div class="modal-box">
@@ -593,6 +617,52 @@
   if('serviceWorker' in navigator){
     window.addEventListener('load', ()=> navigator.serviceWorker.register('/sw.js').catch(()=>{}));
   }
+
+  // ---------- STOCKAGE LOCAL (vrai localStorage, ce site est déployé hors de Claude) ----------
+  function lsGet(key){
+    try{
+      const v = localStorage.getItem(key);
+      return v === null ? null : JSON.parse(v);
+    }catch(e){ return null; }
+  }
+  function lsSet(key, value){
+    try{ localStorage.setItem(key, JSON.stringify(value)); return true; }
+    catch(e){ console.error('Erreur localStorage', e); return false; }
+  }
+
+  // ---------- THÈME CLAIR / SOMBRE ----------
+  const themeBtn = document.getElementById('themeBtn');
+  function applyTheme(mode){
+    document.documentElement.setAttribute('data-theme', mode);
+    themeBtn.textContent = mode === 'light' ? '☾' : '☀︎';
+    lsSet('theme', mode);
+  }
+  themeBtn.addEventListener('click', ()=>{
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    applyTheme(current === 'light' ? 'dark' : 'light');
+  });
+  (function(){
+    const saved = lsGet('theme');
+    if(saved){ applyTheme(saved); }
+    else{
+      const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      applyTheme(prefersLight ? 'light' : 'dark');
+    }
+  })();
+
+  // ---------- HORS LIGNE ----------
+  const offlineBanner = document.getElementById('offlineBanner');
+  function setOfflineBanner(show){
+    offlineBanner.classList.toggle('show', show);
+  }
+  window.addEventListener('offline', ()=> setOfflineBanner(true));
+  window.addEventListener('online', ()=>{
+    setOfflineBanner(false);
+    if(typeof flushPendingSeances === 'function') flushPendingSeances();
+    if(typeof flushPendingBoards === 'function') flushPendingBoards();
+  });
+  if(!navigator.onLine) setOfflineBanner(true);
+
   // ---------- I18N ----------
   const translations = {
     fr: {
@@ -646,7 +716,8 @@
       auth_error_generic:"Une erreur est survenue. Vérifie tes identifiants.",
       auth_signup_check_email:"Compte créé ! Vérifie ta boîte mail pour confirmer.",
       sync_status:"Synchronisé sur ton compte",
-      pro_required:"Fonctionnalité réservée aux comptes Pro. Passe Pro pour en profiter."
+      pro_required:"Fonctionnalité réservée aux comptes Pro. Passe Pro pour en profiter.",
+      offline_banner:"Hors ligne — les modifications seront synchronisées à la reconnexion."
     },
     en: {
       nav_home:"Home", nav_seances:"Sessions", nav_board:"Board", nav_plan:"Plan", nav_contact:"Contact",
@@ -701,7 +772,8 @@
       auth_error_generic:"Something went wrong. Check your details.",
       auth_signup_check_email:"Account created! Check your inbox to confirm.",
       sync_status:"Synced to your account",
-      pro_required:"This feature is for Pro accounts. Upgrade to Pro to unlock it."
+      pro_required:"This feature is for Pro accounts. Upgrade to Pro to unlock it.",
+      offline_banner:"Offline — changes will sync once you're back online."
     },
     nl: {
       nav_home:"Start", nav_seances:"Trainingen", nav_board:"Bord", nav_plan:"Abonnement", nav_contact:"Contact",
@@ -756,7 +828,8 @@
       auth_error_generic:"Er ging iets mis. Controleer je gegevens.",
       auth_signup_check_email:"Account aangemaakt! Controleer je mailbox ter bevestiging.",
       sync_status:"Gesynchroniseerd met je account",
-      pro_required:"Deze functie is voor Pro-accounts. Upgrade naar Pro om ze te gebruiken."
+      pro_required:"Deze functie is voor Pro-accounts. Upgrade naar Pro om ze te gebruiken.",
+      offline_banner:"Offline — wijzigingen worden gesynchroniseerd zodra je weer online bent."
     },
     de: {
       nav_home:"Start", nav_seances:"Einheiten", nav_board:"Board", nav_plan:"Abo", nav_contact:"Kontakt",
@@ -811,7 +884,8 @@
       auth_error_generic:"Etwas ist schiefgelaufen. Prüfe deine Angaben.",
       auth_signup_check_email:"Konto erstellt! Bestätige es über deine E-Mail.",
       sync_status:"Mit deinem Konto synchronisiert",
-      pro_required:"Diese Funktion ist Pro-Konten vorbehalten. Upgrade auf Pro, um sie freizuschalten."
+      pro_required:"Diese Funktion ist Pro-Konten vorbehalten. Upgrade auf Pro, um sie freizuschalten.",
+      offline_banner:"Offline — Änderungen werden synchronisiert, sobald du wieder online bist."
     }
   };
   let currentLang = 'fr';
@@ -830,15 +904,13 @@
   }
 
   const langSelect = document.getElementById('langSelect');
-  langSelect.addEventListener('change', async ()=>{
+  langSelect.addEventListener('change', ()=>{
     applyLang(langSelect.value);
-    try{ await window.storage.set('lang', langSelect.value, false); }catch(e){}
+    lsSet('lang', langSelect.value);
   });
-  (async ()=>{
-    try{
-      const res = await window.storage.get('lang', false);
-      applyLang(res ? res.value : (navigator.language || 'fr').slice(0,2));
-    }catch(e){ applyLang((navigator.language || 'fr').slice(0,2)); }
+  (function(){
+    const saved = lsGet('lang');
+    applyLang(saved || (navigator.language || 'fr').slice(0,2));
   })();
 
   // ---------- AUTH (Supabase) ----------
@@ -959,23 +1031,60 @@
 
   async function loadSeances(){
     if(currentUser){
-      try{
-        const { data, error } = await sb.from('seances').select('*').order('created_at', { ascending:false });
-        if(error) throw error;
-        seances = data || [];
-      }catch(e){ seances = []; console.error('Erreur de chargement des séances', e); }
+      const cacheKey = 'seances_cache_' + currentUser.id;
+      if(navigator.onLine){
+        try{
+          const { data, error } = await sb.from('seances').select('*').order('created_at', { ascending:false });
+          if(error) throw error;
+          seances = data || [];
+          lsSet(cacheKey, seances);
+          setOfflineBanner(false);
+        }catch(e){
+          seances = lsGet(cacheKey) || [];
+          setOfflineBanner(true);
+          console.error('Erreur de chargement des séances', e);
+        }
+      }else{
+        seances = lsGet(cacheKey) || [];
+        setOfflineBanner(true);
+      }
+      seances = seances.concat(pendingSeanceInserts(currentUser.id));
     }else{
-      try{
-        const res = await window.storage.get('seances', false);
-        seances = res ? JSON.parse(res.value) : [];
-      }catch(e){ seances = []; }
+      seances = lsGet('seances_guest') || [];
     }
     renderSeances();
   }
-  async function saveSeancesLocal(){
-    try{ await window.storage.set('seances', JSON.stringify(seances), false); }
-    catch(e){ console.error('Erreur de sauvegarde des séances', e); }
+  function saveSeancesLocal(){
+    lsSet('seances_guest', seances);
   }
+
+  // File d'attente pour les séances créées/supprimées hors connexion
+  function pendingKey(userId){ return 'seances_pending_' + userId; }
+  function getPendingQueue(userId){ return lsGet(pendingKey(userId)) || []; }
+  function setPendingQueue(userId, queue){ lsSet(pendingKey(userId), queue); }
+  function pendingSeanceInserts(userId){
+    return getPendingQueue(userId).filter(op => op.type === 'insert').map(op => ({ ...op.entry, id: op.tempId, pending: true }));
+  }
+  async function flushPendingSeances(){
+    if(!currentUser || !navigator.onLine) return;
+    const userId = currentUser.id;
+    const queue = getPendingQueue(userId);
+    if(!queue.length) return;
+    const remaining = [];
+    for(const op of queue){
+      try{
+        if(op.type === 'insert'){
+          const { error } = await sb.from('seances').insert({ ...op.entry, user_id: userId });
+          if(error) throw error;
+        }else if(op.type === 'delete'){
+          await sb.from('seances').delete().eq('id', op.id);
+        }
+      }catch(e){ remaining.push(op); }
+    }
+    setPendingQueue(userId, remaining);
+    if(remaining.length === 0){ loadSeances(); }
+  }
+
   function renderSeances(){
     const q = (seanceSearch.value || '').trim().toLowerCase();
     const list = q ? seances.filter(s =>
@@ -991,7 +1100,7 @@
     seanceList.innerHTML = list.map((s)=>`
       <div class="seance-card">
         <div>
-          <div class="meta">${escapeHtml(s.date)}</div>
+          <div class="meta">${escapeHtml(s.date)}${s.pending ? ' · ⏳' : ''}</div>
           <div class="theme">${escapeHtml(s.theme)}</div>
           ${s.notes ? `<div class="notes">${escapeHtml(s.notes)}</div>` : ''}
         </div>
@@ -1001,10 +1110,20 @@
     seanceList.querySelectorAll('.icon-btn').forEach(b=>{
       b.addEventListener('click', async ()=>{
         const id = b.dataset.id;
+        const target = seances.find(s => String(s.id) === id);
         if(currentUser){
-          try{ await sb.from('seances').delete().eq('id', id); }
-          catch(e){ console.error('Erreur de suppression', e); }
+          if(target && target.pending){
+            const userId = currentUser.id;
+            setPendingQueue(userId, getPendingQueue(userId).filter(op => op.tempId !== id));
+          }else if(navigator.onLine){
+            try{ const { error } = await sb.from('seances').delete().eq('id', id); if(error) throw error; }
+            catch(e){ console.error('Erreur de suppression', e); }
+          }else{
+            const userId = currentUser.id;
+            setPendingQueue(userId, [...getPendingQueue(userId), { type:'delete', id }]);
+          }
           seances = seances.filter(s=> String(s.id) !== id);
+          lsSet('seances_cache_' + currentUser.id, seances.filter(s => !s.pending));
         }else{
           seances = seances.filter(s=> String(s.id) !== id);
           saveSeancesLocal();
@@ -1025,11 +1144,24 @@
     };
     seanceForm.reset();
     if(currentUser){
-      try{
-        const { data, error } = await sb.from('seances').insert({ ...entry, user_id: currentUser.id }).select().single();
-        if(error) throw error;
-        seances.unshift(data);
-      }catch(e){ console.error('Erreur d\'ajout de séance', e); }
+      const userId = currentUser.id;
+      if(navigator.onLine){
+        try{
+          const { data, error } = await sb.from('seances').insert({ ...entry, user_id: userId }).select().single();
+          if(error) throw error;
+          seances.unshift(data);
+          lsSet('seances_cache_' + userId, seances.filter(s => !s.pending));
+        }catch(e){
+          console.error('Erreur d\'ajout de séance, mise en file d\'attente', e);
+          const tempId = 'pending_' + crypto.randomUUID();
+          setPendingQueue(userId, [...getPendingQueue(userId), { type:'insert', tempId, entry }]);
+          seances.unshift({ ...entry, id: tempId, pending: true });
+        }
+      }else{
+        const tempId = 'pending_' + crypto.randomUUID();
+        setPendingQueue(userId, [...getPendingQueue(userId), { type:'insert', tempId, entry }]);
+        seances.unshift({ ...entry, id: tempId, pending: true });
+      }
     }else{
       seances.unshift({ id: crypto.randomUUID(), ...entry });
       saveSeancesLocal();
@@ -1063,7 +1195,7 @@
     reminderBtn.classList.toggle('active', remindersEnabled);
   }
 
-  async function checkReminders(){
+  function checkReminders(){
     if(!remindersEnabled || !('Notification' in window) || Notification.permission !== 'granted') return;
     const now = new Date();
     if(now.getHours() < 17) return;
@@ -1073,13 +1205,10 @@
       const idx = detectWeekdayIndex(s.date);
       if(idx === null || idx !== tomorrow) continue;
       const flagKey = 'notified_' + s.id + '_' + todayKey;
-      try{
-        await window.storage.get(flagKey, false);
-        continue; // déjà notifié aujourd'hui
-      }catch(e){ /* pas encore notifié, on continue */ }
+      if(lsGet(flagKey)) continue; // déjà notifié aujourd'hui
       try{
         new Notification('CRAIE', { body: s.theme, icon: '/icon-192.png' });
-        await window.storage.set(flagKey, 'true', false);
+        lsSet(flagKey, true);
       }catch(err){ console.error('Erreur de notification', err); }
     }
   }
@@ -1090,20 +1219,17 @@
       const perm = await Notification.requestPermission();
       if(perm !== 'granted'){ alert(t('reminder_denied')); return; }
       remindersEnabled = true;
-      try{ await window.storage.set('reminders_enabled', 'true', false); }catch(e){}
+      lsSet('reminders_enabled', true);
       checkReminders();
     }else{
       remindersEnabled = false;
-      try{ await window.storage.set('reminders_enabled', 'false', false); }catch(e){}
+      lsSet('reminders_enabled', false);
     }
     updateReminderBtn();
   });
 
-  (async ()=>{
-    try{
-      const r = await window.storage.get('reminders_enabled', false);
-      remindersEnabled = !!(r && r.value === 'true' && 'Notification' in window && Notification.permission === 'granted');
-    }catch(e){ remindersEnabled = false; }
+  (function(){
+    remindersEnabled = !!(lsGet('reminders_enabled') && 'Notification' in window && Notification.permission === 'granted');
     updateReminderBtn();
     checkReminders();
   })();
@@ -1570,32 +1696,88 @@
     img.src = svgUrl;
   }
 
+  function boardPendingKey(userId){ return 'board_pending_' + userId; }
+  function getBoardPending(userId){ return lsGet(boardPendingKey(userId)) || {}; }
+  function setBoardPending(userId, obj){ lsSet(boardPendingKey(userId), obj); }
+
   async function saveBoardForSport(sport){
     if(currentUser){
+      const userId = currentUser.id;
+      const cacheKey = 'board_cache_' + userId + '_' + sport;
+      lsSet(cacheKey, objects);
+      if(navigator.onLine){
+        try{
+          const { error } = await sb.from('boards').upsert(
+            { user_id: userId, sport, data: objects, updated_at: new Date().toISOString() },
+            { onConflict: 'user_id,sport' }
+          );
+          if(error) throw error;
+          const pending = getBoardPending(userId);
+          delete pending[sport];
+          setBoardPending(userId, pending);
+          setOfflineBanner(false);
+        }catch(e){
+          const pending = getBoardPending(userId);
+          pending[sport] = objects;
+          setBoardPending(userId, pending);
+          setOfflineBanner(true);
+          console.error('Erreur d\'enregistrement du tableau, mis en attente', e);
+        }
+      }else{
+        const pending = getBoardPending(userId);
+        pending[sport] = objects;
+        setBoardPending(userId, pending);
+        setOfflineBanner(true);
+      }
+    }else{
+      lsSet('board_guest_' + sport, objects);
+    }
+  }
+  async function flushPendingBoards(){
+    if(!currentUser || !navigator.onLine) return;
+    const userId = currentUser.id;
+    const pending = getBoardPending(userId);
+    const sports = Object.keys(pending);
+    if(!sports.length) return;
+    for(const sport of sports){
       try{
-        await sb.from('boards').upsert(
-          { user_id: currentUser.id, sport, data: objects, updated_at: new Date().toISOString() },
+        const { error } = await sb.from('boards').upsert(
+          { user_id: userId, sport, data: pending[sport], updated_at: new Date().toISOString() },
           { onConflict: 'user_id,sport' }
         );
-      }catch(e){ console.error('Erreur d\'enregistrement du tableau', e); }
-    }else{
-      try{ await window.storage.set('board_'+sport, JSON.stringify(objects), false); }
-      catch(e){ console.error('Erreur d\'enregistrement du tableau', e); }
+        if(error) throw error;
+        delete pending[sport];
+      }catch(e){ /* on réessaiera à la prochaine reconnexion */ }
     }
+    setBoardPending(userId, pending);
   }
   async function loadBoardForSport(sport){
     if(currentUser){
-      try{
-        const { data, error } = await sb.from('boards').select('data').eq('sport', sport).maybeSingle();
-        if(error) throw error;
-        objects = (data && data.data) ? data.data : [];
-      }catch(e){ objects = []; console.error('Erreur de chargement du tableau', e); }
+      const userId = currentUser.id;
+      const cacheKey = 'board_cache_' + userId + '_' + sport;
+      const pending = getBoardPending(userId);
+      if(pending[sport]){
+        objects = pending[sport]; // priorité aux modifications non encore synchronisées
+      }else if(navigator.onLine){
+        try{
+          const { data, error } = await sb.from('boards').select('data').eq('sport', sport).maybeSingle();
+          if(error) throw error;
+          objects = (data && data.data) ? data.data : [];
+          lsSet(cacheKey, objects);
+          setOfflineBanner(false);
+        }catch(e){
+          objects = lsGet(cacheKey) || [];
+          setOfflineBanner(true);
+          console.error('Erreur de chargement du tableau', e);
+        }
+      }else{
+        objects = lsGet(cacheKey) || [];
+        setOfflineBanner(true);
+      }
     }else{
-      try{
-        const res = await window.storage.get('board_'+sport, false);
-        objects = res ? JSON.parse(res.value) : [];
-      }catch(e){ objects = []; }
+      objects = lsGet('board_guest_' + sport) || [];
     }
+    tokenCount = objects.filter(o=>o.type==='token').length;
     redraw();
   }
 
