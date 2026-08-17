@@ -907,10 +907,6 @@
     applyLang(langSelect.value);
     lsSet('lang', langSelect.value);
   });
-  (function(){
-    const saved = lsGet('lang');
-    applyLang(saved || (navigator.language || 'fr').slice(0,2));
-  })();
 
   // ---------- AUTH (Supabase) ----------
   const SUPABASE_URL = 'https://xdmsvslnmiwtzcjzrocf.supabase.co';
@@ -1849,6 +1845,10 @@
     const body = encodeURIComponent(msg + '\n\n— ' + name);
     window.location.href = `mailto:andres.visual6@gmail.com?subject=${subject}&body=${body}`;
   });
+
+  // ---------- LANGUE INITIALE ----------
+  // Appelé ici, tout en bas, une fois que toutes les variables (seances, currentUser, etc.) existent déjà.
+  applyLang(lsGet('lang') || (navigator.language || 'fr').slice(0,2));
 
 })();
 </script>
