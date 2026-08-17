@@ -750,8 +750,6 @@
       replay_title:"Animated replay", ai_badge:"Pro",
       replay_desc:"Replay your diagram stroke by stroke, in the order you drew it — perfect for explaining it to the team.",
       replay_btn:"▶ Replay the board", replay_playing:"Playing...", replay_empty:"Draw a diagram on the board first.",
-      ai_desc:"Describe what you need, the assistant suggests a drill for the selected sport.",
-      ai_ph:"E.g. passing drill for beginners, 10 min", ai_btn:"Suggest a drill",
       board_undo:"Undo", board_clear:"Clear all", board_save:"Save", board_load:"Load", board_export:"Export HD",
       plans_eyebrow:"Plan", plans_title:"Free or Pro",
       plans_lede:"The board and schedule stay free. Pro adds the AI assistant and export.",
@@ -807,8 +805,6 @@
       replay_title:"Herhaalde weergave", ai_badge:"Pro",
       replay_desc:"Speel je schema stap voor stap opnieuw af, in de volgorde waarin je het tekende — ideaal om aan het team uit te leggen.",
       replay_btn:"▶ Bord herhalen", replay_playing:"Bezig met afspelen...", replay_empty:"Teken eerst een schema op het bord.",
-      ai_desc:"Beschrijf je behoefte, de assistent stelt een oefening voor bij de gekozen sport.",
-      ai_ph:"Bv. pass-oefening voor beginners, 10 min", ai_btn:"Oefening voorstellen",
       board_undo:"Ongedaan maken", board_clear:"Alles wissen", board_save:"Opslaan", board_load:"Laden", board_export:"Exporteren HD",
       plans_eyebrow:"Abonnement", plans_title:"Gratis of Pro",
       plans_lede:"Bord en planning blijven gratis. Pro voegt de AI-assistent en export toe.",
@@ -864,8 +860,6 @@
       replay_title:"Animierte Wiedergabe", ai_badge:"Pro",
       replay_desc:"Spiele dein Schema Strich für Strich in der gezeichneten Reihenfolge ab — ideal, um es dem Team zu erklären.",
       replay_btn:"▶ Board abspielen", replay_playing:"Wiedergabe läuft...", replay_empty:"Zeichne zuerst ein Schema auf das Board.",
-      ai_desc:"Beschreibe deinen Bedarf, der Assistent schlägt eine Übung für die gewählte Sportart vor.",
-      ai_ph:"Z. B. Passübung für Anfänger, 10 Min", ai_btn:"Übung vorschlagen",
       board_undo:"Rückgängig", board_clear:"Alles löschen", board_save:"Speichern", board_load:"Laden", board_export:"HD exportieren",
       plans_eyebrow:"Abo", plans_title:"Gratis oder Pro",
       plans_lede:"Board und Planung bleiben gratis. Pro ergänzt den KI-Assistenten und den Export.",
@@ -902,7 +896,7 @@
     document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.dataset.i18n); });
     document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder = t(el.dataset.i18nPh); });
     document.querySelectorAll('[data-i18n-title]').forEach(el=>{ el.title = t(el.dataset.i18nTitle); });
-    if(typeof seances !== 'undefined' && !seances.length){ const e = document.querySelector('#seanceList .empty-note'); if(e) e.textContent = t('seances_empty'); }
+    try{ if(!seances.length){ const e = document.querySelector('#seanceList .empty-note'); if(e) e.textContent = t('seances_empty'); } }catch(e){ /* seances pas encore initialisée au tout premier chargement */ }
     document.getElementById('langSelect').value = currentLang;
     if(typeof updateAccountUI === 'function') updateAccountUI();
     if(typeof renderAuthMode === 'function' && document.getElementById('authModal').classList.contains('open')) renderAuthMode();
